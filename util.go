@@ -2,7 +2,10 @@ package jmespath
 
 import (
 	"errors"
+	"math"
 	"reflect"
+
+	"golang.org/x/exp/constraints"
 )
 
 // IsFalse determines if an object is false based on the JMESPath spec.
@@ -148,6 +151,25 @@ func capSlice(length int, actual int, step int) int {
 	return actual
 }
 
+// toArrayArray converts an empty interface type to a slice of slices.
+// If any element in the array cannot be converted, then nil is returned
+// along with a second value of false.
+func toArrayArray(data interface{}) ([][]interface{}, bool) {
+	result := [][]interface{}{}
+	arr, ok := data.([]interface{})
+	if !ok {
+		return nil, false
+	}
+	for _, item := range arr {
+		nested, ok := item.([]interface{})
+		if !ok {
+			return nil, false
+		}
+		result = append(result, nested)
+	}
+	return result, true
+}
+
 // ToArrayNum converts an empty interface type to a slice of float64.
 // If any element in the array cannot be converted, then nil is returned
 // along with a second value of false.
@@ -188,9 +210,40 @@ func toArrayStr(data interface{}) ([]string, bool) {
 	return nil, false
 }
 
+// toInteger converts an empty interface to a integer.
+// It expects the empty interface to represent a float64 JSON number.
+// If the empty interface cannot be converted or if the number
+// is not an integer, the function returns a second boolean value false.
+func toInteger(v interface{}) (int, bool) {
+	if num, ok := v.(float64); ok {
+		if math.Floor(num) != num {
+			return 0, false
+		}
+		return int(math.Floor(num)), true
+	}
+	return 0, false
+}
+func toPositiveInteger(v interface{}) (int, bool) {
+	num, ok := toInteger(v)
+	return num, ok && num >= 0
+}
+
 func isSliceType(v interface{}) bool {
 	if v == nil {
 		return false
 	}
 	return reflect.TypeOf(v).Kind() == reflect.Slice
+}
+
+func min[T constraints.Ordered](a T, b T) T {
+	if a < b {
+		return a
+	}
+	return b
+}
+func max[T constraints.Ordered](a T, b T) T {
+	if a > b {
+		return a
+	}
+	return b
 }

@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/jmespath/go-jmespath/internal/testify/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 type TestSuite struct {
@@ -29,8 +29,12 @@ var whiteListed = []string{
 	"compliance/escape.json",
 	"compliance/filters.json",
 	"compliance/functions.json",
+	"compliance/function_group_by.json",
+	"compliance/function_let.json",
+	"compliance/functions_strings.json",
 	"compliance/identifiers.json",
 	"compliance/indices.json",
+	"compliance/lexical_scoping.json",
 	"compliance/literal.json",
 	"compliance/multiselect.json",
 	"compliance/ormatch.json",
