@@ -13,31 +13,32 @@ func _() {
 	_ = x[ASTArithmeticUnaryExpression-2]
 	_ = x[ASTComparator-3]
 	_ = x[ASTCurrentNode-4]
-	_ = x[ASTExpRef-5]
-	_ = x[ASTFunctionExpression-6]
-	_ = x[ASTField-7]
-	_ = x[ASTFilterProjection-8]
-	_ = x[ASTFlatten-9]
-	_ = x[ASTIdentity-10]
-	_ = x[ASTIndex-11]
-	_ = x[ASTIndexExpression-12]
-	_ = x[ASTKeyValPair-13]
-	_ = x[ASTLiteral-14]
-	_ = x[ASTMultiSelectHash-15]
-	_ = x[ASTMultiSelectList-16]
-	_ = x[ASTOrExpression-17]
-	_ = x[ASTAndExpression-18]
-	_ = x[ASTNotExpression-19]
-	_ = x[ASTPipe-20]
-	_ = x[ASTProjection-21]
-	_ = x[ASTSubexpression-22]
-	_ = x[ASTSlice-23]
-	_ = x[ASTValueProjection-24]
+	_ = x[ASTRootNode-5]
+	_ = x[ASTExpRef-6]
+	_ = x[ASTFunctionExpression-7]
+	_ = x[ASTField-8]
+	_ = x[ASTFilterProjection-9]
+	_ = x[ASTFlatten-10]
+	_ = x[ASTIdentity-11]
+	_ = x[ASTIndex-12]
+	_ = x[ASTIndexExpression-13]
+	_ = x[ASTKeyValPair-14]
+	_ = x[ASTLiteral-15]
+	_ = x[ASTMultiSelectHash-16]
+	_ = x[ASTMultiSelectList-17]
+	_ = x[ASTOrExpression-18]
+	_ = x[ASTAndExpression-19]
+	_ = x[ASTNotExpression-20]
+	_ = x[ASTPipe-21]
+	_ = x[ASTProjection-22]
+	_ = x[ASTSubexpression-23]
+	_ = x[ASTSlice-24]
+	_ = x[ASTValueProjection-25]
 }
 
-const _astNodeType_name = "ASTEmptyASTArithmeticExpressionASTArithmeticUnaryExpressionASTComparatorASTCurrentNodeASTExpRefASTFunctionExpressionASTFieldASTFilterProjectionASTFlattenASTIdentityASTIndexASTIndexExpressionASTKeyValPairASTLiteralASTMultiSelectHashASTMultiSelectListASTOrExpressionASTAndExpressionASTNotExpressionASTPipeASTProjectionASTSubexpressionASTSliceASTValueProjection"
+const _astNodeType_name = "ASTEmptyASTArithmeticExpressionASTArithmeticUnaryExpressionASTComparatorASTCurrentNodeASTRootNodeASTExpRefASTFunctionExpressionASTFieldASTFilterProjectionASTFlattenASTIdentityASTIndexASTIndexExpressionASTKeyValPairASTLiteralASTMultiSelectHashASTMultiSelectListASTOrExpressionASTAndExpressionASTNotExpressionASTPipeASTProjectionASTSubexpressionASTSliceASTValueProjection"
 
-var _astNodeType_index = [...]uint16{0, 8, 31, 59, 72, 86, 95, 116, 124, 143, 153, 164, 172, 190, 203, 213, 231, 249, 264, 280, 296, 303, 316, 332, 340, 358}
+var _astNodeType_index = [...]uint16{0, 8, 31, 59, 72, 86, 97, 106, 127, 135, 154, 164, 175, 183, 201, 214, 224, 242, 260, 275, 291, 307, 314, 327, 343, 351, 369}
 
 func (i astNodeType) String() string {
 	if i < 0 || i >= astNodeType(len(_astNodeType_index)-1) {

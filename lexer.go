@@ -83,6 +83,7 @@ const (
 	tJSONLiteral
 	tStringLiteral
 	tCurrent
+	tRoot
 	tExpref
 	tAnd
 	tNot
@@ -100,6 +101,7 @@ var basicTokens = map[rune]tokType{
 	'(':      tLparen,
 	')':      tRparen,
 	'@':      tCurrent,
+	'$':      tRoot,
 	'+':      tPlus,
 	'%':      tModulo,
 	'\u2212': tMinus,

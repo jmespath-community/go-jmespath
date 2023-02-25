@@ -13,17 +13,26 @@ import (
 */
 
 type treeInterpreter struct {
-	fCall *functionCaller
+	fCall  *functionCaller
+	scopes *scopes
 }
 
-func newInterpreter() *treeInterpreter {
+func newInterpreter(data interface{}) *treeInterpreter {
+	root := make(map[string]interface{})
+	root["$"] = data
+
 	interpreter := treeInterpreter{}
-	interpreter.fCall = newFunctionCaller()
+	interpreter.scopes = newScopes()
+	interpreter.scopes.pushScope(root)
+
+	interpreter.fCall = newFunctionCaller(interpreter.scopes)
+
 	return &interpreter
 }
 
 type expRef struct {
-	ref ASTNode
+	ref     ASTNode
+	context interface{}
 }
 
 // Execute takes an ASTNode and input data and interprets the AST directly.
@@ -113,7 +122,7 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 			return leftNum <= rightNum, nil
 		}
 	case ASTExpRef:
-		return expRef{ref: node.children[0]}, nil
+		return expRef{ref: node.children[0], context: value}, nil
 	case ASTFunctionExpression:
 		resolvedArgs := []interface{}{}
 		for _, arg := range node.children {
@@ -125,11 +134,25 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 		}
 		return intr.fCall.CallFunction(node.value.(string), resolvedArgs, intr)
 	case ASTField:
+		key := node.value.(string)
+		var result interface{}
 		if m, ok := value.(map[string]interface{}); ok {
-			key := node.value.(string)
-			return m[key], nil
+			result = m[key]
+			if result != nil {
+				return result, nil
+			}
 		}
-		return intr.fieldFromStruct(node.value.(string), value)
+		result, err := intr.fieldFromStruct(node.value.(string), value)
+		if err != nil {
+			return nil, err
+		}
+		if result != nil {
+			return result, nil
+		}
+		if result, ok := intr.scopes.getValue(key); ok {
+			return result, nil
+		}
+		return nil, nil
 	case ASTFilterProjection:
 		left, err := intr.Execute(node.children[0], value)
 		if err != nil {
@@ -193,6 +216,11 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 		return flattened, nil
 	case ASTIdentity, ASTCurrentNode:
 		return value, nil
+	case ASTRootNode:
+		if result, ok := intr.scopes.getValue("$"); ok {
+			return result, nil
+		}
+		return nil, nil
 	case ASTIndex:
 		if sliceType, ok := value.([]interface{}); ok {
 			index := node.value.(int)
@@ -289,16 +317,41 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 		}
 		return result, nil
 	case ASTProjection:
+
+		// projections typically operate on array | slices
+		// string slicing produces an ASTProjection whose
+		// first child is an ASTIndexExpression whose
+		// second child is an ASTSlice
+
+		// we allow execution of the left index-expression
+		// to return a string only if the AST has this
+		// specific shape
+
+		allowString := false
+		first_child := node.children[0]
+		if first_child.nodeType == ASTIndexExpression {
+			nested_children := first_child.children
+			if len(nested_children) > 1 && nested_children[1].nodeType == ASTSlice {
+				allowString = true
+			}
+		}
+
 		left, err := intr.Execute(node.children[0], value)
 		if err != nil {
 			return nil, err
 		}
+
 		sliceType, ok := left.([]interface{})
 		if !ok {
 			if isSliceType(left) {
 				return intr.projectWithReflection(node, left)
 			}
-			return nil, nil
+			stringType, ok := left.(string)
+			if allowString && ok {
+				return stringType, nil
+			} else {
+				return nil, nil
+			}
 		}
 		collected := []interface{}{}
 		var current interface{}
@@ -319,21 +372,31 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 		}
 		return intr.Execute(node.children[1], left)
 	case ASTSlice:
+		parts := node.value.([]*int)
 		sliceType, ok := value.([]interface{})
 		if !ok {
 			if isSliceType(value) {
 				return intr.sliceWithReflection(node, value)
+			} else {
+
+				// string slices is implemented by slicing
+				// the corresponding array of runes and
+				// converting the result back to a string
+
+				if stringType, ok := value.(string); ok {
+					runeType := []rune(stringType)
+					sliceParams := makeSliceParams(parts)
+					runes, err := slice(runeType, sliceParams)
+					if err != nil {
+						return nil, nil
+					}
+					return string(runes), nil
+				} else {
+					return nil, nil
+				}
 			}
-			return nil, nil
 		}
-		parts := node.value.([]*int)
-		sliceParams := make([]sliceParam, 3)
-		for i, part := range parts {
-			if part != nil {
-				sliceParams[i].Specified = true
-				sliceParams[i].N = *part
-			}
-		}
+		sliceParams := makeSliceParams(parts)
 		return slice(sliceType, sliceParams)
 	case ASTValueProjection:
 		left, err := intr.Execute(node.children[0], value)

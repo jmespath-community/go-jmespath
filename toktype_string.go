@@ -41,15 +41,16 @@ func _() {
 	_ = x[tJSONLiteral-30]
 	_ = x[tStringLiteral-31]
 	_ = x[tCurrent-32]
-	_ = x[tExpref-33]
-	_ = x[tAnd-34]
-	_ = x[tNot-35]
-	_ = x[tEOF-36]
+	_ = x[tRoot-33]
+	_ = x[tExpref-34]
+	_ = x[tAnd-35]
+	_ = x[tNot-36]
+	_ = x[tEOF-37]
 }
 
-const _tokType_name = "tUnknowntStartDottFiltertFlattentLparentRparentLbrackettRbrackettLbracetRbracetOrtPipetNumbertUnquotedIdentifiertQuotedIdentifiertCommatColontPlustMinustMultiplytDividetModulotDivtLTtLTEtGTtGTEtEQtNEtJSONLiteraltStringLiteraltCurrenttExpreftAndtNottEOF"
+const _tokType_name = "tUnknowntStartDottFiltertFlattentLparentRparentLbrackettRbrackettLbracetRbracetOrtPipetNumbertUnquotedIdentifiertQuotedIdentifiertCommatColontPlustMinustMultiplytDividetModulotDivtLTtLTEtGTtGTEtEQtNEtJSONLiteraltStringLiteraltCurrenttRoottExpreftAndtNottEOF"
 
-var _tokType_index = [...]uint8{0, 8, 13, 17, 24, 32, 39, 46, 55, 64, 71, 78, 81, 86, 93, 112, 129, 135, 141, 146, 152, 161, 168, 175, 179, 182, 186, 189, 193, 196, 199, 211, 225, 233, 240, 244, 248, 252}
+var _tokType_index = [...]uint16{0, 8, 13, 17, 24, 32, 39, 46, 55, 64, 71, 78, 81, 86, 93, 112, 129, 135, 141, 146, 152, 161, 168, 175, 179, 182, 186, 189, 193, 196, 199, 211, 225, 233, 238, 245, 249, 253, 257}
 
 func (i tokType) String() string {
 	if i < 0 || i >= tokType(len(_tokType_index)-1) {

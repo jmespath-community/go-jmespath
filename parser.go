@@ -16,6 +16,7 @@ const (
 	ASTArithmeticUnaryExpression
 	ASTComparator
 	ASTCurrentNode
+	ASTRootNode
 	ASTExpRef
 	ASTFunctionExpression
 	ASTField
@@ -409,6 +410,8 @@ func (p *Parser) nud(token token) (ASTNode, error) {
 		}
 	case tCurrent:
 		return ASTNode{nodeType: ASTCurrentNode}, nil
+	case tRoot:
+		return ASTNode{nodeType: ASTRootNode}, nil
 	case tExpref:
 		expression, err := p.parseExpression(bindingPowers[tExpref])
 		if err != nil {
