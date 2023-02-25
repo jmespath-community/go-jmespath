@@ -1,20 +1,16 @@
 # go-jmespath - A JMESPath implementation in Go
 
-[![Build Status](https://img.shields.io/travis/jmespath/go-jmespath.svg)](https://travis-ci.org/jmespath/go-jmespath)
-
-
-
 go-jmespath is a GO implementation of JMESPath,
 which is a query language for JSON.  It will take a JSON
 document and transform it into another JSON document
 through a JMESPath expression.
 
 Using go-jmespath is really easy.  There's a single function
-you use, `jmespath.search`:
+you use, `jmespath.Search`:
 
 
 ```go
-> import "github.com/jmespath/go-jmespath"
+> import "github.com/jmespath-community/go-jmespath"
 >
 > var jsondata = []byte(`{"foo": {"bar": {"baz": [0, 1, 2, 3, 4]}}}`) // your data
 > var data interface{}
@@ -23,9 +19,9 @@ you use, `jmespath.search`:
 result = 2
 ```
 
-In the example we gave the ``search`` function input data of
+In the example we gave the ``Search`` function input data of
 `{"foo": {"bar": {"baz": [0, 1, 2, 3, 4]}}}` as well as the JMESPath
-expression `foo.bar.baz[2]`, and the `search` function evaluated
+expression `foo.bar.baz[2]`, and the `Search` function evaluated
 the expression against the input data to produce the result ``2``.
 
 The JMESPath language can do a lot more than select an element
@@ -35,7 +31,7 @@ from a list.  Here are a few more examples:
 > var jsondata = []byte(`{"foo": {"bar": {"baz": [0, 1, 2, 3, 4]}}}`) // your data
 > var data interface{}
 > err := json.Unmarshal(jsondata, &data)
-> result, err := jmespath.search("foo.bar", data)
+> result, err := jmespath.Search("foo.bar", data)
 result = { "baz": [ 0, 1, 2, 3, 4 ] }
 
 
@@ -43,7 +39,7 @@ result = { "baz": [ 0, 1, 2, 3, 4 ] }
                            {"first": "c", "last": "d"}]}`) // your data
 > var data interface{}
 > err := json.Unmarshal(jsondata, &data)
-> result, err := jmespath.search({"foo[*].first", data)
+> result, err := jmespath.Search({"foo[*].first", data)
 result [ 'a', 'c' ]
 
 
@@ -52,7 +48,7 @@ result [ 'a', 'c' ]
                            {"age": 40}]}`) // your data
 > var data interface{}
 > err := json.Unmarshal(jsondata, &data)
-> result, err := jmespath.search("foo[?age > `30`]")
+> result, err := jmespath.Search("foo[?age > `30`]")
 result = [ { age: 35 }, { age: 40 } ]
 ```
 
@@ -76,12 +72,12 @@ you are going to run multiple searches with it:
 The example above only show a small amount of what
 a JMESPath expression can do.  If you want to take a
 tour of the language, the *best* place to go is the
-[JMESPath Tutorial](http://jmespath.org/tutorial.html).
+[JMESPath Tutorial](https://jmespath.site/#tutorial).
 
 One of the best things about JMESPath is that it is
 implemented in many different programming languages including
 python, ruby, php, lua, etc.  To see a complete list of libraries,
-check out the [JMESPath libraries page](http://jmespath.org/libraries.html).
+check out the [JMESPath libraries page](https://jmespath.site/#libraries).
 
 And finally, the full JMESPath specification can be found
-on the [JMESPath site](http://jmespath.org/specification.html).
+on the [JMESPath site](https://jmespath.site/#specification).

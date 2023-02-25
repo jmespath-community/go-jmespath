@@ -1,4 +1,4 @@
-module github.com/jmespath/go-jmespath
+module github.com/jmespath-community/go-jmespath
 
 go 1.18
 

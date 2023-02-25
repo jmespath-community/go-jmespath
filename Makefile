@@ -31,7 +31,7 @@ htmlc:
 	go test -coverprofile="/tmp/jpcov"  && go tool cover -html="/tmp/jpcov" && unlink /tmp/jpcov
 
 buildfuzz:
-	go-fuzz-build github.com/jmespath/go-jmespath/fuzz
+	go-fuzz-build github.com/jmespath-community/go-jmespath/fuzz
 
 fuzz: buildfuzz
 	go-fuzz -bin=./jmespath-fuzz.zip -workdir=fuzz/testdata
