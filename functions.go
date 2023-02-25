@@ -598,6 +598,9 @@ func jpfAvg(arguments []interface{}) (interface{}, error) {
 	// type assertions.
 	args := arguments[0].([]interface{})
 	length := float64(len(args))
+	if len(args) == 0 {
+		return nil, nil
+	}
 	numerator := 0.0
 	for _, n := range args {
 		numerator += n.(float64)
