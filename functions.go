@@ -121,10 +121,11 @@ func (a *byExprFloat) Less(i, j int) bool {
 
 type functionCaller struct {
 	functionTable map[string]functionEntry
+	scopes        *scopes
 }
 
-func newFunctionCaller() *functionCaller {
-	caller := &functionCaller{}
+func newFunctionCaller(scopes *scopes) *functionCaller {
+	caller := &functionCaller{scopes: scopes}
 	caller.functionTable = map[string]functionEntry{
 		"abs": {
 			name: "abs",
@@ -218,6 +219,15 @@ func newFunctionCaller() *functionCaller {
 				{types: []jpType{jpString}},
 			},
 			handler: jpfLower,
+		},
+		"let": {
+			name: "let",
+			arguments: []argSpec{
+				{types: []jpType{jpObject}},
+				{types: []jpType{jpExpref}},
+			},
+			handler:   caller.jpfLet,
+			hasExpRef: true,
 		},
 		"map": {
 			name: "amp",
@@ -670,6 +680,22 @@ func jpfLength(arguments []interface{}) (interface{}, error) {
 
 func jpfLower(arguments []interface{}) (interface{}, error) {
 	return strings.ToLower(arguments[0].(string)), nil
+}
+
+func (fCall *functionCaller) jpfLet(arguments []interface{}) (interface{}, error) {
+	intr := arguments[0].(*treeInterpreter)
+	scope := arguments[1].(map[string]interface{})
+	exp := arguments[2].(expRef)
+	node := exp.ref
+	context := exp.context
+
+	fCall.scopes.pushScope(scope)
+	result, err := intr.Execute(node, context)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 func jpfMap(arguments []interface{}) (interface{}, error) {

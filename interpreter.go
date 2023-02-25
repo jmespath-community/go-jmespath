@@ -12,17 +12,26 @@ import (
 */
 
 type treeInterpreter struct {
-	fCall *functionCaller
+	fCall  *functionCaller
+	scopes *scopes
 }
 
-func newInterpreter() *treeInterpreter {
+func newInterpreter(data interface{}) *treeInterpreter {
+	root := make(map[string]interface{})
+	root["$"] = data
+
 	interpreter := treeInterpreter{}
-	interpreter.fCall = newFunctionCaller()
+	interpreter.scopes = newScopes()
+	interpreter.scopes.pushScope(root)
+
+	interpreter.fCall = newFunctionCaller(interpreter.scopes)
+
 	return &interpreter
 }
 
 type expRef struct {
-	ref ASTNode
+	ref     ASTNode
+	context interface{}
 }
 
 // Execute takes an ASTNode and input data and interprets the AST directly.
@@ -64,7 +73,7 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 			return leftNum <= rightNum, nil
 		}
 	case ASTExpRef:
-		return expRef{ref: node.children[0]}, nil
+		return expRef{ref: node.children[0], context: value}, nil
 	case ASTFunctionExpression:
 		resolvedArgs := []interface{}{}
 		for _, arg := range node.children {
@@ -76,11 +85,25 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 		}
 		return intr.fCall.CallFunction(node.value.(string), resolvedArgs, intr)
 	case ASTField:
+		key := node.value.(string)
+		var result interface{}
 		if m, ok := value.(map[string]interface{}); ok {
-			key := node.value.(string)
-			return m[key], nil
+			result = m[key]
+			if result != nil {
+				return result, nil
+			}
 		}
-		return intr.fieldFromStruct(node.value.(string), value)
+		result, err := intr.fieldFromStruct(node.value.(string), value)
+		if err != nil {
+			return nil, err
+		}
+		if result != nil {
+			return result, nil
+		}
+		if result, ok := intr.scopes.getValue(key); ok {
+			return result, nil
+		}
+		return nil, nil
 	case ASTFilterProjection:
 		left, err := intr.Execute(node.children[0], value)
 		if err != nil {
@@ -144,6 +167,11 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 		return flattened, nil
 	case ASTIdentity, ASTCurrentNode:
 		return value, nil
+	case ASTRootNode:
+		if result, ok := intr.scopes.getValue("$"); ok {
+			return result, nil
+		}
+		return nil, nil
 	case ASTIndex:
 		if sliceType, ok := value.([]interface{}); ok {
 			index := node.value.(int)
