@@ -252,6 +252,12 @@ func (p *Parser) led(tokenType tokType, node ASTNode) (ASTNode, error) {
 		right, err := p.parseExpression(bindingPowers[tAnd])
 		return ASTNode{nodeType: ASTAndExpression, children: []ASTNode{node, right}}, err
 	case tLparen:
+		if node.nodeType != ASTField {
+			//  0 - first func arg or closing paren.
+			// -1 - '(' token
+			// -2 - invalid function "name" token.
+			return ASTNode{}, p.syntaxErrorToken("Invalid node as function name.", p.lookaheadToken(-2))
+		}
 		name := node.value
 		var args []ASTNode
 		for p.current() != tRparen {
