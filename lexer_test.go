@@ -53,6 +53,7 @@ var lexingTests = []struct {
 	{"!=", []token{{tNE, "!=", 0, 2}}},
 	{"`[0, 1, 2]`", []token{{tJSONLiteral, "[0, 1, 2]", 1, 9}}},
 	{"'foo'", []token{{tStringLiteral, "foo", 1, 3}}},
+	{"'\\\\'", []token{{tStringLiteral, `\`, 1, 1}}},
 	{"'a'", []token{{tStringLiteral, "a", 1, 1}}},
 	{`'foo\'bar'`, []token{{tStringLiteral, "foo'bar", 1, 7}}},
 	{"@", []token{{tCurrent, "@", 0, 1}}},

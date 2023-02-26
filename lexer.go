@@ -290,13 +290,20 @@ func (lexer *Lexer) consumeRawStringLiteral() (token, error) {
 	start := lexer.currentPos
 	currentIndex := start
 	current := lexer.next()
+	escapes := map[rune]struct{}{
+		'\'': {},
+		'\\': {},
+	}
 	for current != '\'' && lexer.peek() != eof {
-		if current == '\\' && lexer.peek() == '\'' {
-			chunk := lexer.expression[currentIndex : lexer.currentPos-1]
-			lexer.buf.WriteString(chunk)
-			lexer.buf.WriteString("'")
-			lexer.next()
-			currentIndex = lexer.currentPos
+		if current == '\\' {
+			escape := lexer.peek()
+			if _, ok := escapes[escape]; ok {
+				chunk := lexer.expression[currentIndex : lexer.currentPos-1]
+				lexer.buf.WriteString(chunk)
+				lexer.buf.WriteString(string(escape))
+				lexer.next()
+				currentIndex = lexer.currentPos
+			}
 		}
 		current = lexer.next()
 	}
