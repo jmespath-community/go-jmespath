@@ -24,27 +24,28 @@ type TestCase struct {
 }
 
 var whiteListed = []string{
-	"compliance/basic.json",
-	"compliance/current.json",
-	"compliance/escape.json",
-	"compliance/filters.json",
-	"compliance/functions.json",
-	"compliance/function_group_by.json",
-	"compliance/function_let.json",
-	"compliance/functions_strings.json",
-	"compliance/identifiers.json",
-	"compliance/indices.json",
-	"compliance/lexical_scoping.json",
-	"compliance/literal.json",
-	"compliance/multiselect.json",
-	"compliance/ormatch.json",
-	"compliance/pipe.json",
-	"compliance/slice.json",
-	"compliance/syntax.json",
-	"compliance/unicode.json",
-	"compliance/wildcard.json",
-	"compliance/boolean.json",
-	"compliance/arithmetic.json",
+	"compliance/tests/jep-12/jep-12-literal.json",
+	"compliance/tests/arithmetic.json",
+	"compliance/tests/basic.json",
+	"compliance/tests/boolean.json",
+	"compliance/tests/current.json",
+	"compliance/tests/escape.json",
+	"compliance/tests/filters.json",
+	"compliance/tests/functions.json",
+	"compliance/tests/function_group_by.json",
+	"compliance/tests/function_let.json",
+	"compliance/tests/function_strings.json",
+	"compliance/tests/identifiers.json",
+	"compliance/tests/indices.json",
+	"compliance/tests/lexical_scoping.json",
+	"compliance/tests/literal.json",
+	"compliance/tests/multiselect.json",
+	"compliance/tests/ormatch.json",
+	"compliance/tests/pipe.json",
+	"compliance/tests/slice.json",
+	"compliance/tests/syntax.json",
+	"compliance/tests/unicode.json",
+	"compliance/tests/wildcard.json",
 }
 
 func allowed(path string) bool {
@@ -101,6 +102,7 @@ func runTestSuite(assert *assert.Assertions, testsuite TestSuite, filename strin
 func runSyntaxTestCase(assert *assert.Assertions, given interface{}, testcase TestCase, filename string) {
 	// Anything with an .Error means that we expect that JMESPath should return
 	// an error when we try to evaluate the expression.
+	//fmt.Println(fmt.Sprintf("%s: %s", filename, testcase.Expression))
 	_, err := Search(testcase.Expression, given)
 	assert.NotNil(err, fmt.Sprintf("Expression: %s", testcase.Expression))
 }
