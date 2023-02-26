@@ -195,6 +195,9 @@ func (p *Parser) parseSliceExpression() (ASTNode, error) {
 	for current != tRbracket && index < 3 {
 		if current == tColon {
 			index++
+			if index == 3 {
+				return ASTNode{}, p.syntaxErrorToken("Too many colons in slice expression", p.lookaheadToken(0))
+			}
 			p.advance()
 		} else if current == tNumber {
 			parsedInt, err := strconv.Atoi(p.lookaheadToken(0).value)
@@ -397,7 +400,7 @@ func (p *Parser) nud(token token) (ASTNode, error) {
 		if tokenType == tNumber || tokenType == tColon {
 			right, err := p.parseIndexExpression()
 			if err != nil {
-				return ASTNode{}, nil
+				return ASTNode{}, err
 			}
 			return p.projectIfSlice(ASTNode{nodeType: ASTIdentity}, right)
 		} else if tokenType == tStar && p.lookahead(1) == tRbracket {
