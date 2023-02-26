@@ -264,9 +264,6 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 		}
 		return collected, nil
 	case ASTMultiSelectList:
-		if value == nil {
-			return nil, nil
-		}
 		collected := []interface{}{}
 		for _, child := range node.children {
 			current, err := intr.Execute(child, value)
@@ -370,6 +367,9 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 		if err != nil {
 			return nil, err
 		}
+		if left == nil {
+			return nil, nil
+		}
 		return intr.Execute(node.children[1], left)
 	case ASTSlice:
 		parts := node.value.([]*int)
@@ -407,7 +407,7 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 		if !ok {
 			return nil, nil
 		}
-		values := make([]interface{}, len(mapType))
+		values := []interface{}{}
 		for _, value := range mapType {
 			values = append(values, value)
 		}
