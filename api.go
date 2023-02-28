@@ -4,15 +4,8 @@ import "strconv"
 
 // JMESPath is the representation of a compiled JMES path query. A JMESPath is
 // safe for concurrent use by multiple goroutines.
-//
-// As of version 1.10, the treeInterpreter object is no longer
-// safe for concurrent use by multiple goroutines/ as it holds
-// extra state that is mutated during expression evaluation.
-//
-// Therefore, the intr member is no longer part of the structure.
 type JMESPath struct {
 	ast ASTNode
-	//intr *treeInterpreter
 }
 
 // Compile parses a JMESPath expression and returns, if successful, a JMESPath
@@ -46,11 +39,9 @@ func (jp *JMESPath) Search(data interface{}) (interface{}, error) {
 
 // Search evaluates a JMESPath expression against input data and returns the result.
 func Search(expression string, data interface{}) (interface{}, error) {
-	intr := newInterpreter(data)
-	parser := NewParser()
-	ast, err := parser.Parse(expression)
-	if err != nil {
+	if compiled, err := Compile(expression); err != nil {
 		return nil, err
+	} else {
+		return compiled.Search(data)
 	}
-	return intr.Execute(ast, data)
 }

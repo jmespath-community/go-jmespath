@@ -18,12 +18,10 @@ type treeInterpreter struct {
 }
 
 func newInterpreter(data interface{}) *treeInterpreter {
-	root := make(map[string]interface{})
-	root["$"] = data
-
-	interpreter := treeInterpreter{}
-	interpreter.scopes = newScopes()
-	interpreter.scopes.pushScope(root)
+	interpreter := treeInterpreter{
+		scopes: newScopes(),
+	}
+	interpreter.scopes.pushScope(map[string]interface{}{"$": data})
 
 	interpreter.fCall = newFunctionCaller(interpreter.scopes)
 
