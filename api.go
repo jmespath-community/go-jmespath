@@ -4,15 +4,8 @@ import "strconv"
 
 // JMESPath is the representation of a compiled JMES path query. A JMESPath is
 // safe for concurrent use by multiple goroutines.
-//
-// As of version 1.10, the treeInterpreter object is no longer
-// safe for concurrent use by multiple goroutines/ as it holds
-// extra state that is mutated during expression evaluation.
-//
-// Therefore, the intr member is no longer part of the structure.
 type JMESPath struct {
 	ast ASTNode
-	//intr *treeInterpreter
 }
 
 // Compile parses a JMESPath expression and returns, if successful, a JMESPath
