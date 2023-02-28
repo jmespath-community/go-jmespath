@@ -42,3 +42,62 @@ func TestInvalidMustCompilePanics(t *testing.T) {
 	}()
 	MustCompile("not a valid expression")
 }
+
+func TestSearch(t *testing.T) {
+	type args struct {
+		expression string
+		data       interface{}
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    interface{}
+		wantErr bool
+	}{{
+		args: args{
+			expression: "not a valid expression",
+		},
+		wantErr: true,
+	}}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert := assert.New(t)
+			got, err := Search(tt.args.expression, tt.args.data)
+			assert.Equal(tt.wantErr, err != nil)
+			assert.Equal(tt.want, got)
+		})
+	}
+}
+
+func TestMustCompile(t *testing.T) {
+	type args struct {
+		expression string
+	}
+	tests := []struct {
+		name      string
+		args      args
+		wantPanic bool
+	}{{
+		args: args{
+			expression: "not a valid expression",
+		},
+		wantPanic: true,
+	}, {
+		args: args{
+			expression: "foo.bar.baz[2]",
+		},
+	}}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert := assert.New(t)
+			if tt.wantPanic {
+				defer func() {
+					r := recover()
+					assert.NotNil(r)
+				}()
+			}
+			got := MustCompile(tt.args.expression)
+			assert.NotNil(got)
+		})
+	}
+}
