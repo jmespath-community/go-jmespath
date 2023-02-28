@@ -58,15 +58,15 @@ You can also pre-compile your query. This is usefull if
 you are going to run multiple searches with it:
 
 ```go
-	> var jsondata = []byte(`{"foo": "bar"}`)
-	> var data interface{}
-    > err := json.Unmarshal(jsondata, &data)
-	> precompiled, err := Compile("foo")
-	> if err != nil{
-    >   // ... handle the error
-    > }
-    > result, err := precompiled.Search(data)
-	result = "bar"
+> var jsondata = []byte(`{"foo": "bar"}`)
+> var data interface{}
+> err := json.Unmarshal(jsondata, &data)
+> precompiled, err := Compile("foo")
+> if err != nil{
+>   // ... handle the error
+> }
+> result, err := precompiled.Search(data)
+result = "bar"
 ```
 
 ## More Resources
