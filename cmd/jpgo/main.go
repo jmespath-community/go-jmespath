@@ -1,18 +1,18 @@
-/*Basic command line interface for debug and testing purposes.
+/*
+Basic command line interface for debug and testing purposes.
 
 Examples:
 
 Only print the AST for the expression:
 
-    jp.go -ast "foo.bar.baz"
+	jp.go -ast "foo.bar.baz"
 
 Evaluate the JMESPath expression against JSON data from a file:
 
-    jp.go -input /tmp/data.json "foo.bar.baz"
+	jp.go -input /tmp/data.json "foo.bar.baz"
 
 This program can also be used as an executable to the jp-compliance
 runner (github.com/jmespath-community/jmespath.test).
-
 */
 package main
 
@@ -20,7 +20,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 
 	"github.com/jmespath-community/go-jmespath"
@@ -62,14 +62,14 @@ func run() int {
 
 	var inputData []byte
 	if *inputFile != "" {
-		inputData, err = ioutil.ReadFile(*inputFile)
+		inputData, err = os.ReadFile(*inputFile)
 		if err != nil {
 			return errMsg("Error loading file %s: %s", *inputFile, err)
 		}
 	} else {
 		// If an input data file is not provided then we read the
 		// data from stdin.
-		inputData, err = ioutil.ReadAll(os.Stdin)
+		inputData, err = io.ReadAll(os.Stdin)
 		if err != nil {
 			return errMsg("Error reading from stdin: %s", err)
 		}
