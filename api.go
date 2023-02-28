@@ -13,6 +13,7 @@ import "strconv"
 type JMESPath struct {
 	ast ASTNode
 	//intr *treeInterpreter
+	functions map[string]FunctionEntry
 }
 
 // Compile parses a JMESPath expression and returns, if successful, a JMESPath
@@ -23,7 +24,7 @@ func Compile(expression string) (*JMESPath, error) {
 	if err != nil {
 		return nil, err
 	}
-	jmespath := &JMESPath{ast: ast}
+	jmespath := &JMESPath{ast: ast, functions: map[string]FunctionEntry{}}
 	return jmespath, nil
 }
 
@@ -40,17 +41,21 @@ func MustCompile(expression string) *JMESPath {
 
 // Search evaluates a JMESPath expression against input data and returns the result.
 func (jp *JMESPath) Search(data interface{}) (interface{}, error) {
-	intr := newInterpreter(data)
+	intr := newInterpreter(data, jp.functions)
 	return intr.Execute(jp.ast, data)
 }
 
 // Search evaluates a JMESPath expression against input data and returns the result.
 func Search(expression string, data interface{}) (interface{}, error) {
-	intr := newInterpreter(data)
+	intr := newInterpreter(data, nil)
 	parser := NewParser()
 	ast, err := parser.Parse(expression)
 	if err != nil {
 		return nil, err
 	}
 	return intr.Execute(ast, data)
+}
+
+func (jp *JMESPath) Register(f FunctionEntry) {
+	jp.functions[f.Name] = f
 }

@@ -17,7 +17,7 @@ type treeInterpreter struct {
 	scopes *scopes
 }
 
-func newInterpreter(data interface{}) *treeInterpreter {
+func newInterpreter(data interface{}, functions map[string]FunctionEntry) *treeInterpreter {
 	root := make(map[string]interface{})
 	root["$"] = data
 
@@ -25,7 +25,7 @@ func newInterpreter(data interface{}) *treeInterpreter {
 	interpreter.scopes = newScopes()
 	interpreter.scopes.pushScope(root)
 
-	interpreter.fCall = newFunctionCaller(interpreter.scopes)
+	interpreter.fCall = newFunctionCaller(interpreter.scopes, functions)
 
 	return &interpreter
 }
