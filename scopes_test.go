@@ -44,6 +44,6 @@ func TestScopesNested(t *testing.T) {
 	assert.Equal("bar", value.(string))
 
 	scopes.popScope()
-	value, found = scopes.getValue("foo")
+	_, found = scopes.getValue("foo")
 	assert.False(found)
 }
