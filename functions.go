@@ -1023,7 +1023,7 @@ func jpfPadImpl(
 	if len(arguments) > 2 {
 		chars = arguments[2].(string)
 		if len(chars) > 1 {
-			return nil, errors.New(fmt.Sprintf("invalid value, the function '%s' expects its 'pad' argument to be a string of length 1", name))
+			return nil, fmt.Errorf("invalid value, the function '%s' expects its 'pad' argument to be a string of length 1", name)
 		}
 	}
 
