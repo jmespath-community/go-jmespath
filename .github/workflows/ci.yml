@@ -2,7 +2,12 @@ name: ci
 
 on:
   push:
+    branches:
+      - '*'
   pull_request:
+    branches:
+      - '*'
+
 jobs:
   run-tests:
     name: Run Tests
@@ -13,9 +18,9 @@ jobs:
           - 1.19
           - 1.18
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
           go-version: ${{ matrix.go-version }}
       - name: Install deps 
