@@ -46,11 +46,9 @@ func (jp *JMESPath) Search(data interface{}) (interface{}, error) {
 
 // Search evaluates a JMESPath expression against input data and returns the result.
 func Search(expression string, data interface{}) (interface{}, error) {
-	intr := newInterpreter(data)
-	parser := NewParser()
-	ast, err := parser.Parse(expression)
-	if err != nil {
+	if compiled, err := Compile(expression); err != nil {
 		return nil, err
+	} else {
+		return compiled.Search(data)
 	}
-	return intr.Execute(ast, data)
 }
