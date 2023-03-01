@@ -523,7 +523,7 @@ func getMinExpected(arguments []argSpec) int {
 	expected := 0
 	for _, spec := range arguments {
 		if !spec.optional {
-			expected += 1
+			expected++
 		}
 	}
 	return expected
