@@ -1,4 +1,4 @@
-package jmespath
+package api
 
 import (
 	"strconv"
