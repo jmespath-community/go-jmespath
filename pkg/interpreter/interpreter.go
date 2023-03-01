@@ -328,10 +328,10 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 		// specific shape
 
 		allowString := false
-		first_child := node.Children[0]
-		if first_child.NodeType == parsing.ASTIndexExpression {
-			nested_children := first_child.Children
-			if len(nested_children) > 1 && nested_children[1].NodeType == parsing.ASTSlice {
+		firstChild := node.Children[0]
+		if firstChild.NodeType == parsing.ASTIndexExpression {
+			nestedChildren := firstChild.Children
+			if len(nestedChildren) > 1 && nestedChildren[1].NodeType == parsing.ASTSlice {
 				allowString = true
 			}
 		}
