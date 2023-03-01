@@ -41,4 +41,22 @@ linters:
 
 
     # - structcheck
+    - stylecheck
+    - tagliatelle
+    - tenv
+    - testableexamples
+    # - testpackage
+    - thelper
+    - tparallel
+    - typecheck
+
+    - unconvert
+    # - unparam
     - unused
+    - usestdlibvars
+    # - varcheck
+    # - varnamelen
+    - wastedassign
+    - whitespace
+    # - wrapcheck
+    # - wsl

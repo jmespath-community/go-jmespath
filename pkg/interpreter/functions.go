@@ -532,7 +532,7 @@ func getMaxExpected(arguments []argSpec) (int, bool) {
 	if isVariadic(arguments) {
 		return 0, false
 	} else {
-		return int(len(arguments)), true
+		return len(arguments), true
 	}
 }
 
@@ -577,7 +577,7 @@ func (a *argSpec) typeCheck(arg interface{}) error {
 			}
 		}
 	}
-	return fmt.Errorf("Invalid type for: %v, expected: %#v", arg, a.types)
+	return fmt.Errorf("invalid type for: %v, expected: %#v", arg, a.types)
 }
 
 func (f *functionCaller) CallFunction(name string, arguments []interface{}, intr Interpreter) (interface{}, error) {
@@ -789,7 +789,7 @@ func jpfLower(arguments []interface{}) (interface{}, error) {
 	return strings.ToLower(arguments[0].(string)), nil
 }
 
-func (fCall *functionCaller) jpfLet(arguments []interface{}) (interface{}, error) {
+func (f *functionCaller) jpfLet(arguments []interface{}) (interface{}, error) {
 	intr := arguments[0].(Interpreter)
 	scope := arguments[1].(map[string]interface{})
 	exp := arguments[2].(expRef)
@@ -797,7 +797,6 @@ func (fCall *functionCaller) jpfLet(arguments []interface{}) (interface{}, error
 	context := exp.context
 
 	result, err := intr.WithScope(scope).Execute(node, context)
-	if err != nil {
 		return nil, err
 	}
 

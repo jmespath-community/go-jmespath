@@ -170,6 +170,7 @@ func BenchmarkLexDeepProjection104(b *testing.B) {
 }
 
 func runLexBenchmark(b *testing.B, expression string) {
+	b.Helper()
 	assert := assert.New(b)
 	lexer := NewLexer()
 	for i := 0; i < b.N; i++ {
