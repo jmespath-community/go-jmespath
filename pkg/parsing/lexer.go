@@ -277,7 +277,7 @@ func (lexer *Lexer) consumeLiteral() (token, error) {
 	if err != nil {
 		return token{}, err
 	}
-	value = strings.Replace(value, "\\`", "`", -1)
+	value = strings.ReplaceAll(value, "\\`", "`")
 	return token{
 		tokenType: TOKJSONLiteral,
 		value:     value,

@@ -8,9 +8,11 @@ import (
 func NotAnInteger(name string, arg string) error {
 	return errors.New(formatNotAnInteger(name, arg))
 }
+
 func NotAPositiveInteger(name string, arg string) error {
 	return errors.New(formatNotAPositiveInteger(name, arg))
 }
+
 func NotEnoughArgumentsSupplied(name string, count int, minExpected int, variadic bool) error {
 	return errors.New(formatNotEnoughArguments(name, count, minExpected, variadic))
 }
@@ -22,11 +24,12 @@ func TooManyArgumentsSupplied(name string, count int, maxExpected int) error {
 func formatNotAnInteger(name string, arg string) string {
 	return fmt.Sprintf("invalid value, the function '%s' expects its '%s' argument to be an integer.", name, arg)
 }
+
 func formatNotAPositiveInteger(name string, arg string) string {
 	return fmt.Sprintf("invalid value, the function '%s' expects its '%s' argument to be a an integer value greater than or equal to zero.", name, arg)
 }
-func formatNotEnoughArguments(name string, count int, minExpected int, variadic bool) string {
 
+func formatNotEnoughArguments(name string, count int, minExpected int, variadic bool) string {
 	more := ""
 	only := ""
 
