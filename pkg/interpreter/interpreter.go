@@ -349,9 +349,8 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 			stringType, ok := left.(string)
 			if allowString && ok {
 				return stringType, nil
-			} else {
-				return nil, nil
 			}
+			return nil, nil
 		}
 		collected := []interface{}{}
 		var current interface{}
@@ -380,23 +379,20 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 		if !ok {
 			if util.IsSliceType(value) {
 				return intr.sliceWithReflection(node, value)
-			} else {
-				// string slices is implemented by slicing
-				// the corresponding array of runes and
-				// converting the result back to a string
-
-				if stringType, ok := value.(string); ok {
-					runeType := []rune(stringType)
-					sliceParams := util.MakeSliceParams(parts)
-					runes, err := util.Slice(runeType, sliceParams)
-					if err != nil {
-						return nil, nil
-					}
-					return string(runes), nil
-				} else {
+			}
+			// string slices is implemented by slicing
+			// the corresponding array of runes and
+			// converting the result back to a string
+			if stringType, ok := value.(string); ok {
+				runeType := []rune(stringType)
+				sliceParams := util.MakeSliceParams(parts)
+				runes, err := util.Slice(runeType, sliceParams)
+				if err != nil {
 					return nil, nil
 				}
+				return string(runes), nil
 			}
+			return nil, nil
 		}
 		sliceParams := util.MakeSliceParams(parts)
 		return util.Slice(sliceType, sliceParams)

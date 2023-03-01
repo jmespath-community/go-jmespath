@@ -532,9 +532,8 @@ func getMinExpected(arguments []ArgSpec) int {
 func getMaxExpected(arguments []ArgSpec) (int, bool) {
 	if isVariadic(arguments) {
 		return 0, false
-	} else {
-		return len(arguments), true
 	}
+	return len(arguments), true
 }
 
 func (a *ArgSpec) typeCheck(arg interface{}) error {
@@ -730,14 +729,14 @@ func jpfGroupBy(arguments []interface{}) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		if key, ok := spec.(string); !ok {
+		key, ok := spec.(string)
+		if !ok {
 			return nil, errors.New("invalid type, the expression must evaluate to a string")
-		} else {
-			if _, ok := groups[key]; !ok {
-				groups[key] = []interface{}{}
-			}
-			groups[key] = append(groups[key].([]interface{}), element)
 		}
+		if _, ok := groups[key]; !ok {
+			groups[key] = []interface{}{}
+		}
+		groups[key] = append(groups[key].([]interface{}), element)
 	}
 	return groups, nil
 }
