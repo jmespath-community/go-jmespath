@@ -48,8 +48,9 @@ type ArgSpec struct {
 }
 
 type byExprString struct {
-	items []interface{}
-	keys  []interface{}
+	items    []interface{}
+	keys     []interface{}
+	hasError bool
 }
 
 func (a *byExprString) Len() int {
@@ -62,14 +63,23 @@ func (a *byExprString) Swap(i, j int) {
 }
 
 func (a *byExprString) Less(i, j int) bool {
-	ith := a.keys[i].(string)
-	jth := a.keys[j].(string)
+	ith, ok := a.keys[i].(string)
+	if !ok {
+		a.hasError = true
+		return true
+	}
+	jth, ok := a.keys[j].(string)
+	if !ok {
+		a.hasError = true
+		return true
+	}
 	return ith < jth
 }
 
 type byExprFloat struct {
-	items []interface{}
-	keys  []interface{}
+	items    []interface{}
+	keys     []interface{}
+	hasError bool
 }
 
 func (a *byExprFloat) Len() int {
@@ -82,8 +92,16 @@ func (a *byExprFloat) Swap(i, j int) {
 }
 
 func (a *byExprFloat) Less(i, j int) bool {
-	ith := a.keys[i].(float64)
-	jth := a.keys[j].(float64)
+	ith, ok := a.keys[i].(float64)
+	if !ok {
+		a.hasError = true
+		return true
+	}
+	jth, ok := a.keys[j].(float64)
+	if !ok {
+		a.hasError = true
+		return true
+	}
 	return ith < jth
 }
 
@@ -1079,12 +1097,18 @@ func jpfSortBy(exec ExecuteFunc, arguments []interface{}) (interface{}, error) {
 		}
 	}
 	if _, ok := sortKeys[0].(float64); ok {
-		sortable := &byExprFloat{arr, sortKeys}
+		sortable := &byExprFloat{arr, sortKeys, false}
 		sort.Stable(sortable)
+		if sortable.hasError {
+			return nil, errors.New("error in sort_by comparison")
+		}
 		return arr, nil
 	} else if _, ok := sortKeys[0].(string); ok {
-		sortable := &byExprString{arr, sortKeys}
+		sortable := &byExprString{arr, sortKeys, false}
 		sort.Stable(sortable)
+		if sortable.hasError {
+			return nil, errors.New("error in sort_by comparison")
+		}
 		return arr, nil
 	} else {
 		return nil, errors.New("invalid type, must be number of string")
