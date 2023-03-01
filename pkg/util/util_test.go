@@ -28,7 +28,6 @@ func TestIsFalseJSONTypes(t *testing.T) {
 	m := make(map[string]interface{})
 	assert.True(IsFalse(m))
 	assert.True(IsFalse(nil))
-
 }
 
 func TestIsFalseWithUserDefinedStructs(t *testing.T) {

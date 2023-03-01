@@ -384,7 +384,6 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 			if util.IsSliceType(value) {
 				return intr.sliceWithReflection(node, value)
 			} else {
-
 				// string slices is implemented by slicing
 				// the corresponding array of runes and
 				// converting the result back to a string

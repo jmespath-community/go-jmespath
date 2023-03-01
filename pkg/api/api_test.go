@@ -9,7 +9,7 @@ import (
 
 func TestValidUncompiledExpressionSearches(t *testing.T) {
 	assert := assert.New(t)
-	var j = []byte(`{"foo": {"bar": {"baz": [0, 1, 2, 3, 4]}}}`)
+	j := []byte(`{"foo": {"bar": {"baz": [0, 1, 2, 3, 4]}}}`)
 	var d interface{}
 	err := json.Unmarshal(j, &d)
 	assert.Nil(err)

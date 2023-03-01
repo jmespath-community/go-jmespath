@@ -63,7 +63,7 @@ func TestCompliance(t *testing.T) {
 
 	var complianceFiles []string
 	err := filepath.Walk("compliance", func(path string, _ os.FileInfo, _ error) error {
-		//if strings.HasSuffix(path, ".json") {
+		// if strings.HasSuffix(path, ".json") {
 		if allowed(path) {
 			complianceFiles = append(complianceFiles, path)
 		}
@@ -103,7 +103,7 @@ func runTestSuite(assert *assert.Assertions, testsuite TestSuite, filename strin
 func runSyntaxTestCase(assert *assert.Assertions, given interface{}, testcase TestCase, filename string) {
 	// Anything with an .Error means that we expect that JMESPath should return
 	// an error when we try to evaluate the expression.
-	//fmt.Println(fmt.Sprintf("%s: %s", filename, testcase.Expression))
+	// fmt.Println(fmt.Sprintf("%s: %s", filename, testcase.Expression))
 	_, err := api.Search(testcase.Expression, given)
 	assert.NotNil(err, fmt.Sprintf("Expression: %s", testcase.Expression))
 }
