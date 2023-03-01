@@ -47,7 +47,7 @@ type argSpec struct {
 }
 
 type byExprString struct {
-	intr     *treeInterpreter
+	intr     Interpreter
 	node     parsing.ASTNode
 	items    []interface{}
 	hasError bool
@@ -86,7 +86,7 @@ func (a *byExprString) Less(i, j int) bool {
 }
 
 type byExprFloat struct {
-	intr     *treeInterpreter
+	intr     Interpreter
 	node     parsing.ASTNode
 	items    []interface{}
 	hasError bool
@@ -575,7 +575,7 @@ func (a *argSpec) typeCheck(arg interface{}) error {
 	return fmt.Errorf("Invalid type for: %v, expected: %#v", arg, a.types)
 }
 
-func (f *functionCaller) CallFunction(name string, arguments []interface{}, intr *treeInterpreter) (interface{}, error) {
+func (f *functionCaller) CallFunction(name string, arguments []interface{}, intr Interpreter) (interface{}, error) {
 	entry, ok := f.functionTable[name]
 	if !ok {
 		return nil, errors.New("unknown function: " + name)
@@ -711,7 +711,7 @@ func jpfFromItems(arguments []interface{}) (interface{}, error) {
 }
 
 func jpfGroupBy(arguments []interface{}) (interface{}, error) {
-	intr := arguments[0].(*treeInterpreter)
+	intr := arguments[0].(Interpreter)
 	arr := arguments[1].([]interface{})
 	exp := arguments[2].(expRef)
 	node := exp.ref
@@ -784,7 +784,7 @@ func jpfLower(arguments []interface{}) (interface{}, error) {
 }
 
 func (fCall *functionCaller) jpfLet(arguments []interface{}) (interface{}, error) {
-	intr := arguments[0].(*treeInterpreter)
+	intr := arguments[0].(Interpreter)
 	scope := arguments[1].(map[string]interface{})
 	exp := arguments[2].(expRef)
 	node := exp.ref
@@ -800,7 +800,7 @@ func (fCall *functionCaller) jpfLet(arguments []interface{}) (interface{}, error
 }
 
 func jpfMap(arguments []interface{}) (interface{}, error) {
-	intr := arguments[0].(*treeInterpreter)
+	intr := arguments[0].(Interpreter)
 	exp := arguments[1].(expRef)
 	node := exp.ref
 	arr := arguments[2].([]interface{})
@@ -849,7 +849,7 @@ func jpfMax(arguments []interface{}) (interface{}, error) {
 }
 
 func jpfMaxBy(arguments []interface{}) (interface{}, error) {
-	intr := arguments[0].(*treeInterpreter)
+	intr := arguments[0].(Interpreter)
 	arr := arguments[1].([]interface{})
 	exp := arguments[2].(expRef)
 	node := exp.ref
@@ -948,7 +948,7 @@ func jpfMin(arguments []interface{}) (interface{}, error) {
 }
 
 func jpfMinBy(arguments []interface{}) (interface{}, error) {
-	intr := arguments[0].(*treeInterpreter)
+	intr := arguments[0].(Interpreter)
 	arr := arguments[1].([]interface{})
 	exp := arguments[2].(expRef)
 	node := exp.ref
@@ -1106,7 +1106,7 @@ func jpfSort(arguments []interface{}) (interface{}, error) {
 }
 
 func jpfSortBy(arguments []interface{}) (interface{}, error) {
-	intr := arguments[0].(*treeInterpreter)
+	intr := arguments[0].(Interpreter)
 	arr := arguments[1].([]interface{})
 	exp := arguments[2].(expRef)
 	node := exp.ref
