@@ -126,11 +126,10 @@ func (a *byExprFloat) Less(i, j int) bool {
 
 type functionCaller struct {
 	functionTable map[string]functionEntry
-	scopes        *scopes
 }
 
-func newFunctionCaller(scopes *scopes) *functionCaller {
-	caller := &functionCaller{scopes: scopes}
+func newFunctionCaller() *functionCaller {
+	caller := &functionCaller{}
 	caller.functionTable = map[string]functionEntry{
 		"abs": {
 			name: "abs",
@@ -790,8 +789,7 @@ func (fCall *functionCaller) jpfLet(arguments []interface{}) (interface{}, error
 	node := exp.ref
 	context := exp.context
 
-	fCall.scopes.pushScope(scope)
-	result, err := intr.Execute(node, context)
+	result, err := intr.WithScope(scope).Execute(node, context)
 	if err != nil {
 		return nil, err
 	}
