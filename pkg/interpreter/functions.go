@@ -10,39 +10,47 @@ import (
 	"github.com/jmespath-community/go-jmespath/pkg/util"
 )
 
+type functionEntry struct {
+	arguments []functions.ArgSpec
+	handler   functions.JpFunction
+}
+
 type functionCaller struct {
-	functionTable map[string]functions.FunctionEntry
+	functionTable map[string]functionEntry
 }
 
 func newFunctionCaller(funcs ...functions.FunctionEntry) *functionCaller {
-	fTable := map[string]functions.FunctionEntry{}
+	fTable := map[string]functionEntry{}
 	for _, f := range funcs {
-		fTable[f.Name] = f
+		fTable[f.Name] = functionEntry{
+			arguments: f.Arguments,
+			handler:   f.Handler,
+		}
 	}
 	return &functionCaller{
 		functionTable: fTable,
 	}
 }
 
-func resolveArgs(e functions.FunctionEntry, arguments []interface{}) ([]interface{}, error) {
-	if len(e.Arguments) == 0 {
+func resolveArgs(name string, function functionEntry, arguments []interface{}) ([]interface{}, error) {
+	if len(function.arguments) == 0 {
 		return arguments, nil
 	}
 
-	variadic := isVariadic(e.Arguments)
-	minExpected := getMinExpected(e.Arguments)
-	maxExpected, hasMax := getMaxExpected(e.Arguments)
+	variadic := isVariadic(function.arguments)
+	minExpected := getMinExpected(function.arguments)
+	maxExpected, hasMax := getMaxExpected(function.arguments)
 	count := len(arguments)
 
 	if count < minExpected {
-		return nil, jperror.NotEnoughArgumentsSupplied(e.Name, count, minExpected, variadic)
+		return nil, jperror.NotEnoughArgumentsSupplied(name, count, minExpected, variadic)
 	}
 
 	if hasMax && count > maxExpected {
-		return nil, jperror.TooManyArgumentsSupplied(e.Name, count, maxExpected)
+		return nil, jperror.TooManyArgumentsSupplied(name, count, maxExpected)
 	}
 
-	for i, spec := range e.Arguments {
+	for i, spec := range function.arguments {
 		if !spec.Optional || i <= len(arguments)-1 {
 			userArg := arguments[i]
 			err := typeCheck(spec, userArg)
@@ -51,10 +59,10 @@ func resolveArgs(e functions.FunctionEntry, arguments []interface{}) ([]interfac
 			}
 		}
 	}
-	lastIndex := len(e.Arguments) - 1
-	lastArg := e.Arguments[lastIndex]
+	lastIndex := len(function.arguments) - 1
+	lastArg := function.arguments[lastIndex]
 	if lastArg.Variadic {
-		for i := len(e.Arguments) - 1; i < len(arguments); i++ {
+		for i := len(function.arguments) - 1; i < len(arguments); i++ {
 			userArg := arguments[i]
 			err := typeCheck(lastArg, userArg)
 			if err != nil {
@@ -140,7 +148,7 @@ func (f *functionCaller) CallFunction(name string, arguments []interface{}, intr
 	if !ok {
 		return nil, errors.New("unknown function: " + name)
 	}
-	resolvedArgs, err := resolveArgs(entry, arguments)
+	resolvedArgs, err := resolveArgs(name, entry, arguments)
 	if err != nil {
 		return nil, err
 	}
@@ -151,5 +159,5 @@ func (f *functionCaller) CallFunction(name string, arguments []interface{}, intr
 		}
 		return intr.Execute(node, data)
 	}
-	return entry.Handler(exec, resolvedArgs)
+	return entry.handler(exec, resolvedArgs)
 }
