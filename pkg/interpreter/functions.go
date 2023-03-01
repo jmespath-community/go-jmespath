@@ -48,9 +48,8 @@ type ArgSpec struct {
 }
 
 type byExprString struct {
-	exec     ExecuteFunc
-	node     parsing.ASTNode
 	items    []interface{}
+	keys     []interface{}
 	hasError bool
 }
 
@@ -60,27 +59,16 @@ func (a *byExprString) Len() int {
 
 func (a *byExprString) Swap(i, j int) {
 	a.items[i], a.items[j] = a.items[j], a.items[i]
+	a.keys[i], a.keys[j] = a.keys[j], a.keys[i]
 }
 
 func (a *byExprString) Less(i, j int) bool {
-	first, err := a.exec(a.node, a.items[i], nil)
-	if err != nil {
-		a.hasError = true
-		// Return a dummy value.
-		return true
-	}
-	ith, ok := first.(string)
+	ith, ok := a.keys[i].(string)
 	if !ok {
 		a.hasError = true
 		return true
 	}
-	second, err := a.exec(a.node, a.items[j], nil)
-	if err != nil {
-		a.hasError = true
-		// Return a dummy value.
-		return true
-	}
-	jth, ok := second.(string)
+	jth, ok := a.keys[j].(string)
 	if !ok {
 		a.hasError = true
 		return true
@@ -89,9 +77,8 @@ func (a *byExprString) Less(i, j int) bool {
 }
 
 type byExprFloat struct {
-	exec     ExecuteFunc
-	node     parsing.ASTNode
 	items    []interface{}
+	keys     []interface{}
 	hasError bool
 }
 
@@ -101,27 +88,16 @@ func (a *byExprFloat) Len() int {
 
 func (a *byExprFloat) Swap(i, j int) {
 	a.items[i], a.items[j] = a.items[j], a.items[i]
+	a.keys[i], a.keys[j] = a.keys[j], a.keys[i]
 }
 
 func (a *byExprFloat) Less(i, j int) bool {
-	first, err := a.exec(a.node, a.items[i], nil)
-	if err != nil {
-		a.hasError = true
-		// Return a dummy value.
-		return true
-	}
-	ith, ok := first.(float64)
+	ith, ok := a.keys[i].(float64)
 	if !ok {
 		a.hasError = true
 		return true
 	}
-	second, err := a.exec(a.node, a.items[j], nil)
-	if err != nil {
-		a.hasError = true
-		// Return a dummy value.
-		return true
-	}
-	jth, ok := second.(float64)
+	jth, ok := a.keys[j].(float64)
 	if !ok {
 		a.hasError = true
 		return true
@@ -1112,19 +1088,23 @@ func jpfSortBy(exec ExecuteFunc, arguments []interface{}) (interface{}, error) {
 	} else if len(arr) == 1 {
 		return arr, nil
 	}
-	start, err := exec(node, arr[0], nil)
-	if err != nil {
-		return nil, err
+	var sortKeys []interface{}
+	for _, item := range arr {
+		if value, err := exec(node, item, nil); err != nil {
+			return nil, err
+		} else {
+			sortKeys = append(sortKeys, value)
+		}
 	}
-	if _, ok := start.(float64); ok {
-		sortable := &byExprFloat{exec, node, arr, false}
+	if _, ok := sortKeys[0].(float64); ok {
+		sortable := &byExprFloat{arr, sortKeys, false}
 		sort.Stable(sortable)
 		if sortable.hasError {
 			return nil, errors.New("error in sort_by comparison")
 		}
 		return arr, nil
-	} else if _, ok := start.(string); ok {
-		sortable := &byExprString{exec, node, arr, false}
+	} else if _, ok := sortKeys[0].(string); ok {
+		sortable := &byExprString{arr, sortKeys, false}
 		sort.Stable(sortable)
 		if sortable.hasError {
 			return nil, errors.New("error in sort_by comparison")
