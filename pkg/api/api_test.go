@@ -64,6 +64,13 @@ func TestSearch(t *testing.T) {
 			data:       map[string]interface{}{},
 		},
 		wantErr: false,
+	}, {
+		args: args{
+			expression: "sort_by(@, &@ *`-1.0`)",
+			data:       []interface{}{1.0, 2.0, 3.0, 4.0, 5.0},
+		},
+		want:    []interface{}{5.0, 4.0, 3.0, 2.0, 1.0},
+		wantErr: false,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

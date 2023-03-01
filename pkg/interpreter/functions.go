@@ -13,7 +13,6 @@ import (
 	"unicode/utf8"
 
 	jperror "github.com/jmespath-community/go-jmespath/pkg/error"
-	"github.com/jmespath-community/go-jmespath/pkg/parsing"
 	"github.com/jmespath-community/go-jmespath/pkg/util"
 )
 
@@ -46,10 +45,8 @@ type ArgSpec struct {
 }
 
 type byExprString struct {
-	intr     Interpreter
-	node     parsing.ASTNode
-	items    []interface{}
-	hasError bool
+	items []interface{}
+	keys  []interface{}
 }
 
 func (a *byExprString) Len() int {
@@ -58,39 +55,18 @@ func (a *byExprString) Len() int {
 
 func (a *byExprString) Swap(i, j int) {
 	a.items[i], a.items[j] = a.items[j], a.items[i]
+	a.keys[i], a.keys[j] = a.keys[j], a.keys[i]
 }
 
 func (a *byExprString) Less(i, j int) bool {
-	first, err := a.intr.Execute(a.node, a.items[i])
-	if err != nil {
-		a.hasError = true
-		// Return a dummy value.
-		return true
-	}
-	ith, ok := first.(string)
-	if !ok {
-		a.hasError = true
-		return true
-	}
-	second, err := a.intr.Execute(a.node, a.items[j])
-	if err != nil {
-		a.hasError = true
-		// Return a dummy value.
-		return true
-	}
-	jth, ok := second.(string)
-	if !ok {
-		a.hasError = true
-		return true
-	}
+	ith := a.keys[i].(string)
+	jth := a.keys[j].(string)
 	return ith < jth
 }
 
 type byExprFloat struct {
-	intr     Interpreter
-	node     parsing.ASTNode
-	items    []interface{}
-	hasError bool
+	items []interface{}
+	keys  []interface{}
 }
 
 func (a *byExprFloat) Len() int {
@@ -99,31 +75,12 @@ func (a *byExprFloat) Len() int {
 
 func (a *byExprFloat) Swap(i, j int) {
 	a.items[i], a.items[j] = a.items[j], a.items[i]
+	a.keys[i], a.keys[j] = a.keys[j], a.keys[i]
 }
 
 func (a *byExprFloat) Less(i, j int) bool {
-	first, err := a.intr.Execute(a.node, a.items[i])
-	if err != nil {
-		a.hasError = true
-		// Return a dummy value.
-		return true
-	}
-	ith, ok := first.(float64)
-	if !ok {
-		a.hasError = true
-		return true
-	}
-	second, err := a.intr.Execute(a.node, a.items[j])
-	if err != nil {
-		a.hasError = true
-		// Return a dummy value.
-		return true
-	}
-	jth, ok := second.(float64)
-	if !ok {
-		a.hasError = true
-		return true
-	}
+	ith := a.keys[i].(float64)
+	jth := a.keys[j].(float64)
 	return ith < jth
 }
 
@@ -1103,23 +1060,21 @@ func jpfSortBy(intr Interpreter, arguments []interface{}) (interface{}, error) {
 	} else if len(arr) == 1 {
 		return arr, nil
 	}
-	start, err := intr.Execute(node, arr[0])
-	if err != nil {
-		return nil, err
+	var sortKeys []interface{}
+	for _, item := range arr {
+		if value, err := intr.Execute(node, item); err != nil {
+			return nil, err
+		} else {
+			sortKeys = append(sortKeys, value)
+		}
 	}
-	if _, ok := start.(float64); ok {
-		sortable := &byExprFloat{intr, node, arr, false}
+	if _, ok := sortKeys[0].(float64); ok {
+		sortable := &byExprFloat{arr, sortKeys}
 		sort.Stable(sortable)
-		if sortable.hasError {
-			return nil, errors.New("error in sort_by comparison")
-		}
 		return arr, nil
-	} else if _, ok := start.(string); ok {
-		sortable := &byExprString{intr, node, arr, false}
+	} else if _, ok := sortKeys[0].(string); ok {
+		sortable := &byExprString{arr, sortKeys}
 		sort.Stable(sortable)
-		if sortable.hasError {
-			return nil, errors.New("error in sort_by comparison")
-		}
 		return arr, nil
 	} else {
 		return nil, errors.New("invalid type, must be number of string")
