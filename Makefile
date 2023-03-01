@@ -1,7 +1,6 @@
 
 CMD = jpgo
 
-SRC_PKGS=./ ./cmd/... ./fuzz/...
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
@@ -11,20 +10,20 @@ help:
 
 
 generate:
-	go generate ${SRC_PKGS}
+	go generate ./...
 
 build:
 	rm -f $(CMD)
-	go build ${SRC_PKGS}
+	go build ./...
 	rm -f cmd/$(CMD)/$(CMD) && cd cmd/$(CMD)/ && go build ./...
 	mv cmd/$(CMD)/$(CMD) .
 
 test: build
-	go test -v ${SRC_PKGS}
+	go test -v ./...
 
 check:
-	go vet ${SRC_PKGS}
-	golint ${SRC_PKGS}
+	go vet ./...
+	golint ./...
 	golangci-lint run
 
 htmlc:
