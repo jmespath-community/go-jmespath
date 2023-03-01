@@ -129,12 +129,12 @@ func (a *byExprFloat) Less(i, j int) bool {
 }
 
 type functionCaller struct {
-	functionTable map[string]functionEntry
+	functionTable map[string]FunctionEntry
 }
 
 func newFunctionCaller() *functionCaller {
 	caller := &functionCaller{}
-	caller.functionTable = map[string]functionEntry{
+	caller.functionTable = map[string]FunctionEntry{
 		"abs": {
 			Name: "abs",
 			Arguments: []ArgSpec{
