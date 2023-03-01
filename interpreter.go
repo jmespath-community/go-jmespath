@@ -51,9 +51,9 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 			return nil, nil
 		}
 		switch node.Value {
-		case tPlus:
+		case parsing.TOKPlus:
 			return num, nil
-		case tMinus:
+		case parsing.TOKMinus:
 			return -num, nil
 		}
 	case parsing.ASTArithmeticExpression:
@@ -74,19 +74,19 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 			return nil, nil
 		}
 		switch node.Value {
-		case tPlus:
+		case parsing.TOKPlus:
 			return leftNum + rightNum, nil
-		case tMinus:
+		case parsing.TOKMinus:
 			return leftNum - rightNum, nil
-		case tStar:
+		case parsing.TOKStar:
 			return leftNum * rightNum, nil
-		case tMultiply:
+		case parsing.TOKMultiply:
 			return leftNum * rightNum, nil
-		case tDivide:
+		case parsing.TOKDivide:
 			return leftNum / rightNum, nil
-		case tModulo:
+		case parsing.TOKModulo:
 			return math.Mod(leftNum, rightNum), nil
-		case tDiv:
+		case parsing.TOKDiv:
 			return math.Floor(leftNum / rightNum), nil
 		}
 	case parsing.ASTComparator:
@@ -99,9 +99,9 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 			return nil, err
 		}
 		switch node.Value {
-		case tEQ:
+		case parsing.TOKEQ:
 			return util.ObjsEqual(left, right), nil
-		case tNE:
+		case parsing.TOKNE:
 			return !util.ObjsEqual(left, right), nil
 		}
 		leftNum, ok := left.(float64)
@@ -113,13 +113,13 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 			return nil, nil
 		}
 		switch node.Value {
-		case tGT:
+		case parsing.TOKGT:
 			return leftNum > rightNum, nil
-		case tGTE:
+		case parsing.TOKGTE:
 			return leftNum >= rightNum, nil
-		case tLT:
+		case parsing.TOKLT:
 			return leftNum < rightNum, nil
-		case tLTE:
+		case parsing.TOKLTE:
 			return leftNum <= rightNum, nil
 		}
 	case parsing.ASTExpRef:

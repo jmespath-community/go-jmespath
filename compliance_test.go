@@ -110,7 +110,7 @@ func runSyntaxTestCase(assert *assert.Assertions, given interface{}, testcase Te
 func runTestCase(assert *assert.Assertions, given interface{}, testcase TestCase, filename string) {
 	lexer := parsing.NewLexer()
 	var err error
-	_, err = lexer.tokenize(testcase.Expression)
+	_, err = lexer.Tokenize(testcase.Expression)
 	if err != nil {
 		errMsg := fmt.Sprintf("(%s) Could not lex expression: %s -- %s", filename, testcase.Expression, err.Error())
 		assert.Fail(errMsg)
