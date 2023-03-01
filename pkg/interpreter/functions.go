@@ -56,9 +56,11 @@ type byExprString struct {
 func (a *byExprString) Len() int {
 	return len(a.items)
 }
+
 func (a *byExprString) Swap(i, j int) {
 	a.items[i], a.items[j] = a.items[j], a.items[i]
 }
+
 func (a *byExprString) Less(i, j int) bool {
 	first, err := a.intr.Execute(a.node, a.items[i])
 	if err != nil {
@@ -95,9 +97,11 @@ type byExprFloat struct {
 func (a *byExprFloat) Len() int {
 	return len(a.items)
 }
+
 func (a *byExprFloat) Swap(i, j int) {
 	a.items[i], a.items[j] = a.items[j], a.items[i]
 }
+
 func (a *byExprFloat) Less(i, j int) bool {
 	first, err := a.intr.Execute(a.node, a.items[i])
 	if err != nil {
@@ -514,15 +518,17 @@ func isVariadic(arguments []argSpec) bool {
 	}
 	return false
 }
+
 func getMinExpected(arguments []argSpec) int {
 	expected := 0
 	for _, spec := range arguments {
 		if !spec.optional {
-			expected += 1
+			expected++
 		}
 	}
 	return expected
 }
+
 func getMaxExpected(arguments []argSpec) (int, bool) {
 	if isVariadic(arguments) {
 		return 0, false
@@ -740,7 +746,8 @@ func jpfItems(arguments []interface{}) (interface{}, error) {
 	value := arguments[0].(map[string]interface{})
 	arrays := []interface{}{}
 	for key, item := range value {
-		arrays = append(arrays, []interface{}{key, item})
+		var element interface{} = []interface{}{key, item}
+		arrays = append(arrays, element)
 	}
 
 	return arrays, nil
@@ -1014,8 +1021,8 @@ func jpfNotNull(arguments []interface{}) (interface{}, error) {
 func jpfPadImpl(
 	name string,
 	arguments []interface{},
-	pad func(s string, width int, pad string) string) (interface{}, error) {
-
+	pad func(s string, width int, pad string) string,
+) (interface{}, error) {
 	s := arguments[0].(string)
 	width, ok := util.ToPositiveInteger(arguments[1])
 	if !ok {
@@ -1035,15 +1042,18 @@ func jpfPadImpl(
 func jpfPadLeft(arguments []interface{}) (interface{}, error) {
 	return jpfPadImpl("pad_left", arguments, padLeft)
 }
+
 func jpfPadRight(arguments []interface{}) (interface{}, error) {
 	return jpfPadImpl("pad_right", arguments, padRight)
 }
+
 func padLeft(s string, width int, pad string) string {
 	length := util.Max(0, width-len(s))
 	padding := strings.Repeat(pad, length)
 	result := fmt.Sprintf("%s%s", padding, s)
 	return result
 }
+
 func padRight(s string, width int, pad string) string {
 	length := util.Max(0, width-len(s))
 	padding := strings.Repeat(pad, length)
@@ -1238,8 +1248,8 @@ func jpfToNumber(arguments []interface{}) (interface{}, error) {
 func jpfTrimImpl(
 	arguments []interface{},
 	trimSpace func(s string, predicate func(r rune) bool) string,
-	trim func(s string, cutset string) string) (interface{}, error) {
-
+	trim func(s string, cutset string) string,
+) (interface{}, error) {
 	s := arguments[0].(string)
 	cutset := ""
 	if len(arguments) > 1 {
@@ -1251,12 +1261,15 @@ func jpfTrimImpl(
 	}
 	return trim(s, cutset), nil
 }
+
 func jpfTrim(arguments []interface{}) (interface{}, error) {
 	return jpfTrimImpl(arguments, strings.TrimFunc, strings.Trim)
 }
+
 func jpfTrimLeft(arguments []interface{}) (interface{}, error) {
 	return jpfTrimImpl(arguments, strings.TrimLeftFunc, strings.TrimLeft)
 }
+
 func jpfTrimRight(arguments []interface{}) (interface{}, error) {
 	return jpfTrimImpl(arguments, strings.TrimRightFunc, strings.TrimRight)
 }
@@ -1316,7 +1329,7 @@ func jpfZip(arguments []interface{}) (interface{}, error) {
 			arr := item.([]interface{})
 			nth = append(nth, arr[i])
 		}
-		result = append(result, nth)
+		result = append(result, interface{}(nth))
 	}
 
 	return result, nil

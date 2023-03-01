@@ -12,7 +12,7 @@ import (
 // JMESPath defines false values to be any of:
 // - An empty string array, or hash.
 // - The boolean value false.
-// - nil
+// - nil.
 func IsFalse(value interface{}) bool {
 	switch v := value.(type) {
 	case bool:
@@ -242,6 +242,7 @@ func Min[T constraints.Ordered](a T, b T) T {
 	}
 	return b
 }
+
 func Max[T constraints.Ordered](a T, b T) T {
 	if a > b {
 		return a

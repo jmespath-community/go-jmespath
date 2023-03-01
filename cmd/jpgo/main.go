@@ -34,7 +34,6 @@ func errMsg(msg string, a ...interface{}) int {
 }
 
 func run() int {
-
 	astOnly := flag.Bool("ast", false, "Print the AST for the input expression and exit.")
 	inputFile := flag.String("input", "", "Filename containing JSON data to search. If not provided, data is read from stdin.")
 
