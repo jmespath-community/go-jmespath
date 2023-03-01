@@ -18,27 +18,31 @@ This is a tree based interpreter.  It walks the AST and directly
 */
 type Interpreter interface {
 	Execute(parsing.ASTNode, interface{}) (interface{}, error)
+	WithScope(map[string]interface{}) Interpreter
 }
 
 type treeInterpreter struct {
-	fCall  *functionCaller
-	scopes *scopes
+	fCall *functionCaller
+	scope Scope
 }
 
 func NewInterpreter(data interface{}) Interpreter {
-	interpreter := treeInterpreter{
-		scopes: newScopes(),
+	return &treeInterpreter{
+		fCall: newFunctionCaller(),
+		scope: newScope(map[string]interface{}{"$": data}),
 	}
-	interpreter.scopes.pushScope(map[string]interface{}{"$": data})
-
-	interpreter.fCall = newFunctionCaller(interpreter.scopes)
-
-	return &interpreter
 }
 
 type expRef struct {
 	ref     parsing.ASTNode
 	context interface{}
+}
+
+func (intr *treeInterpreter) WithScope(data map[string]interface{}) Interpreter {
+	return &treeInterpreter{
+		fCall: intr.fCall,
+		scope: intr.scope.With(data),
+	}
 }
 
 // Execute takes an ASTNode and input data and interprets the AST directly.
@@ -152,7 +156,7 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 		if result != nil {
 			return result, nil
 		}
-		if result, ok := intr.scopes.getValue(key); ok {
+		if result, ok := intr.scope.GetValue(key); ok {
 			return result, nil
 		}
 		return nil, nil
@@ -220,7 +224,7 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 	case parsing.ASTIdentity, parsing.ASTCurrentNode:
 		return value, nil
 	case parsing.ASTRootNode:
-		if result, ok := intr.scopes.getValue("$"); ok {
+		if result, ok := intr.scope.GetValue("$"); ok {
 			return result, nil
 		}
 		return nil, nil
