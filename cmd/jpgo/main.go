@@ -24,6 +24,7 @@ import (
 	"os"
 
 	"github.com/jmespath-community/go-jmespath"
+	"github.com/jmespath-community/go-jmespath/pkg/parsing"
 )
 
 func errMsg(msg string, a ...interface{}) int {
@@ -46,10 +47,10 @@ func run() int {
 	}
 
 	expression := args[0]
-	parser := jmespath.NewParser()
+	parser := parsing.NewParser()
 	parsed, err := parser.Parse(expression)
 	if err != nil {
-		if syntaxError, ok := err.(jmespath.SyntaxError); ok {
+		if syntaxError, ok := err.(parsing.SyntaxError); ok {
 			return errMsg("%s\n%s\n", syntaxError, syntaxError.HighlightLocation())
 		}
 		return errMsg("%s", err)

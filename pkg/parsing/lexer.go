@@ -1,4 +1,4 @@
-package jmespath
+package parsing
 
 import (
 	"bytes"
@@ -10,13 +10,13 @@ import (
 )
 
 type token struct {
-	tokenType tokType
+	tokenType TokType
 	value     string
 	position  int
 	length    int
 }
 
-type tokType int
+type TokType int
 
 const eof = -1
 
@@ -48,65 +48,65 @@ func (e SyntaxError) HighlightLocation() string {
 	return e.Expression + "\n" + strings.Repeat(" ", e.Offset) + "^"
 }
 
-//go:generate stringer -type=tokType
+//go:generate stringer -type=TokType
 const (
-	tUnknown tokType = iota
-	tStar
-	tDot
-	tFilter
-	tFlatten
-	tLparen
-	tRparen
-	tLbracket
-	tRbracket
-	tLbrace
-	tRbrace
-	tOr
-	tPipe
-	tNumber
-	tUnquotedIdentifier
-	tQuotedIdentifier
-	tComma
-	tColon
-	tPlus
-	tMinus
-	tMultiply
-	tDivide
-	tModulo
-	tDiv
-	tLT
-	tLTE
-	tGT
-	tGTE
-	tEQ
-	tNE
-	tJSONLiteral
-	tStringLiteral
-	tCurrent
-	tRoot
-	tExpref
-	tAnd
-	tNot
-	tEOF
+	TOKUnknown TokType = iota
+	TOKStar
+	TOKDot
+	TOKFilter
+	TOKFlatten
+	TOKLparen
+	TOKRparen
+	TOKLbracket
+	TOKRbracket
+	TOKLbrace
+	TOKRbrace
+	TOKOr
+	TOKPipe
+	TOKNumber
+	TOKUnquotedIdentifier
+	TOKQuotedIdentifier
+	TOKComma
+	TOKColon
+	TOKPlus
+	TOKMinus
+	TOKMultiply
+	TOKDivide
+	TOKModulo
+	TOKDiv
+	TOKLT
+	TOKLTE
+	TOKGT
+	TOKGTE
+	TOKEQ
+	TOKNE
+	TOKJSONLiteral
+	TOKStringLiteral
+	TOKCurrent
+	TOKRoot
+	TOKExpref
+	TOKAnd
+	TOKNot
+	TOKEOF
 )
 
-var basicTokens = map[rune]tokType{
-	'.':      tDot,
-	'*':      tStar,
-	',':      tComma,
-	':':      tColon,
-	'{':      tLbrace,
-	'}':      tRbrace,
-	']':      tRbracket, // tLbracket not included because it could be "[]"
-	'(':      tLparen,
-	')':      tRparen,
-	'@':      tCurrent,
-	'$':      tRoot,
-	'+':      tPlus,
-	'%':      tModulo,
-	'\u2212': tMinus,
-	'\u00d7': tMultiply,
-	'\u00f7': tDivide,
+var basicTokens = map[rune]TokType{
+	'.':      TOKDot,
+	'*':      TOKStar,
+	',':      TOKComma,
+	':':      TOKColon,
+	'{':      TOKLbrace,
+	'}':      TOKRbrace,
+	']':      TOKRbracket, // tLbracket not included because it could be "[]"
+	'(':      TOKLparen,
+	')':      TOKRparen,
+	'@':      TOKCurrent,
+	'$':      TOKRoot,
+	'+':      TOKPlus,
+	'%':      TOKModulo,
+	'\u2212': TOKMinus,
+	'\u00d7': TOKMultiply,
+	'\u00f7': TOKDivide,
 }
 
 // Bit mask for [a-zA-Z_] shifted down 64 bits to fit in a single uint64.
@@ -154,7 +154,7 @@ func (lexer *Lexer) peek() rune {
 }
 
 // tokenize takes an expression and returns corresponding tokens.
-func (lexer *Lexer) tokenize(expression string) ([]token, error) {
+func (lexer *Lexer) Tokenize(expression string) ([]token, error) {
 	var tokens []token
 	lexer.expression = expression
 	lexer.currentPos = 0
@@ -181,7 +181,7 @@ loop:
 				tokens = append(tokens, t)
 			} else {
 				t := token{
-					tokenType: tMinus,
+					tokenType: TOKMinus,
 					value:     string(r),
 					position:  lexer.currentPos - lexer.lastWidth,
 					length:    1,
@@ -192,7 +192,7 @@ loop:
 			t := lexer.consumeNumber()
 			tokens = append(tokens, t)
 		} else if r == '/' {
-			t := lexer.matchOrElse(r, '/', tDiv, tDivide)
+			t := lexer.matchOrElse(r, '/', TOKDiv, TOKDivide)
 			tokens = append(tokens, t)
 		} else if r == '[' {
 			t := lexer.consumeLBracket()
@@ -216,22 +216,22 @@ loop:
 			}
 			tokens = append(tokens, t)
 		} else if r == '|' {
-			t := lexer.matchOrElse(r, '|', tOr, tPipe)
+			t := lexer.matchOrElse(r, '|', TOKOr, TOKPipe)
 			tokens = append(tokens, t)
 		} else if r == '<' {
-			t := lexer.matchOrElse(r, '=', tLTE, tLT)
+			t := lexer.matchOrElse(r, '=', TOKLTE, TOKLT)
 			tokens = append(tokens, t)
 		} else if r == '>' {
-			t := lexer.matchOrElse(r, '=', tGTE, tGT)
+			t := lexer.matchOrElse(r, '=', TOKGTE, TOKGT)
 			tokens = append(tokens, t)
 		} else if r == '!' {
-			t := lexer.matchOrElse(r, '=', tNE, tNot)
+			t := lexer.matchOrElse(r, '=', TOKNE, TOKNot)
 			tokens = append(tokens, t)
 		} else if r == '=' {
-			t := lexer.matchOrElse(r, '=', tEQ, tUnknown)
+			t := lexer.matchOrElse(r, '=', TOKEQ, TOKUnknown)
 			tokens = append(tokens, t)
 		} else if r == '&' {
-			t := lexer.matchOrElse(r, '&', tAnd, tExpref)
+			t := lexer.matchOrElse(r, '&', TOKAnd, TOKExpref)
 			tokens = append(tokens, t)
 		} else if r == eof {
 			break loop
@@ -241,7 +241,7 @@ loop:
 			return tokens, lexer.syntaxError(fmt.Sprintf("Unknown char: %s", strconv.QuoteRuneToASCII(r)))
 		}
 	}
-	tokens = append(tokens, token{tEOF, "", len(lexer.expression), 0})
+	tokens = append(tokens, token{TOKEOF, "", len(lexer.expression), 0})
 	return tokens, nil
 }
 
@@ -279,7 +279,7 @@ func (lexer *Lexer) consumeLiteral() (token, error) {
 	}
 	value = strings.Replace(value, "\\`", "`", -1)
 	return token{
-		tokenType: tJSONLiteral,
+		tokenType: TOKJSONLiteral,
 		value:     value,
 		position:  start,
 		length:    len(value),
@@ -323,7 +323,7 @@ func (lexer *Lexer) consumeRawStringLiteral() (token, error) {
 	// Reset the buffer so it can reused again.
 	lexer.buf.Reset()
 	return token{
-		tokenType: tStringLiteral,
+		tokenType: TOKStringLiteral,
 		value:     value,
 		position:  start,
 		length:    len(value),
@@ -341,7 +341,7 @@ func (lexer *Lexer) syntaxError(msg string) SyntaxError {
 // Checks for a two char token, otherwise matches a single character
 // token. This is used whenever a two char token overlaps a single
 // char token, e.g. "||" -> tPipe, "|" -> tOr.
-func (lexer *Lexer) matchOrElse(first rune, second rune, matchedType tokType, singleCharType tokType) token {
+func (lexer *Lexer) matchOrElse(first rune, second rune, matchedType TokType, singleCharType TokType) token {
 	start := lexer.currentPos - lexer.lastWidth
 	nextRune := lexer.next()
 	var t token
@@ -374,21 +374,21 @@ func (lexer *Lexer) consumeLBracket() token {
 	var t token
 	if nextRune == '?' {
 		t = token{
-			tokenType: tFilter,
+			tokenType: TOKFilter,
 			value:     "[?",
 			position:  start,
 			length:    2,
 		}
 	} else if nextRune == ']' {
 		t = token{
-			tokenType: tFlatten,
+			tokenType: TOKFlatten,
 			value:     "[]",
 			position:  start,
 			length:    2,
 		}
 	} else {
 		t = token{
-			tokenType: tLbracket,
+			tokenType: TOKLbracket,
 			value:     "[",
 			position:  start,
 			length:    1,
@@ -410,7 +410,7 @@ func (lexer *Lexer) consumeQuotedIdentifier() (token, error) {
 		return token{}, err
 	}
 	return token{
-		tokenType: tQuotedIdentifier,
+		tokenType: TOKQuotedIdentifier,
 		value:     decoded,
 		position:  start - 1,
 		length:    len(decoded),
@@ -430,7 +430,7 @@ func (lexer *Lexer) consumeUnquotedIdentifier() token {
 	}
 	value := lexer.expression[start:lexer.currentPos]
 	return token{
-		tokenType: tUnquotedIdentifier,
+		tokenType: TOKUnquotedIdentifier,
 		value:     value,
 		position:  start,
 		length:    lexer.currentPos - start,
@@ -449,7 +449,7 @@ func (lexer *Lexer) consumeNumber() token {
 	}
 	value := lexer.expression[start:lexer.currentPos]
 	return token{
-		tokenType: tNumber,
+		tokenType: TOKNumber,
 		value:     value,
 		position:  start,
 		length:    lexer.currentPos - start,

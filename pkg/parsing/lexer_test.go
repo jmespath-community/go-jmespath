@@ -1,4 +1,4 @@
-package jmespath
+package parsing
 
 import (
 	"fmt"
@@ -11,77 +11,77 @@ var lexingTests = []struct {
 	expression string
 	expected   []token
 }{
-	{"*", []token{{tStar, "*", 0, 1}}},
-	{".", []token{{tDot, ".", 0, 1}}},
-	{"[?", []token{{tFilter, "[?", 0, 2}}},
-	{"[]", []token{{tFlatten, "[]", 0, 2}}},
-	{"(", []token{{tLparen, "(", 0, 1}}},
-	{")", []token{{tRparen, ")", 0, 1}}},
-	{"[", []token{{tLbracket, "[", 0, 1}}},
-	{"]", []token{{tRbracket, "]", 0, 1}}},
-	{"{", []token{{tLbrace, "{", 0, 1}}},
-	{"}", []token{{tRbrace, "}", 0, 1}}},
-	{"||", []token{{tOr, "||", 0, 2}}},
-	{"|", []token{{tPipe, "|", 0, 1}}},
-	{"29", []token{{tNumber, "29", 0, 2}}},
-	{"2", []token{{tNumber, "2", 0, 1}}},
-	{"0", []token{{tNumber, "0", 0, 1}}},
-	{"-20", []token{{tNumber, "-20", 0, 3}}},
-	{"foo", []token{{tUnquotedIdentifier, "foo", 0, 3}}},
-	{`"bar"`, []token{{tQuotedIdentifier, "bar", 0, 3}}},
+	{"*", []token{{TOKStar, "*", 0, 1}}},
+	{".", []token{{TOKDot, ".", 0, 1}}},
+	{"[?", []token{{TOKFilter, "[?", 0, 2}}},
+	{"[]", []token{{TOKFlatten, "[]", 0, 2}}},
+	{"(", []token{{TOKLparen, "(", 0, 1}}},
+	{")", []token{{TOKRparen, ")", 0, 1}}},
+	{"[", []token{{TOKLbracket, "[", 0, 1}}},
+	{"]", []token{{TOKRbracket, "]", 0, 1}}},
+	{"{", []token{{TOKLbrace, "{", 0, 1}}},
+	{"}", []token{{TOKRbrace, "}", 0, 1}}},
+	{"||", []token{{TOKOr, "||", 0, 2}}},
+	{"|", []token{{TOKPipe, "|", 0, 1}}},
+	{"29", []token{{TOKNumber, "29", 0, 2}}},
+	{"2", []token{{TOKNumber, "2", 0, 1}}},
+	{"0", []token{{TOKNumber, "0", 0, 1}}},
+	{"-20", []token{{TOKNumber, "-20", 0, 3}}},
+	{"foo", []token{{TOKUnquotedIdentifier, "foo", 0, 3}}},
+	{`"bar"`, []token{{TOKQuotedIdentifier, "bar", 0, 3}}},
 	// Arithmetic operators
-	{"+", []token{{tPlus, "+", 0, 1}}},
-	{"/", []token{{tDivide, "/", 0, 1}}},
-	{"\u2212", []token{{tMinus, "\u2212", 0, 1}}},
-	{"\u00d7", []token{{tMultiply, "\u00d7", 0, 1}}},
-	{"\u00f7", []token{{tDivide, "\u00f7", 0, 1}}},
-	{"%", []token{{tModulo, "%", 0, 1}}},
-	{"//", []token{{tDiv, "//", 0, 2}}},
+	{"+", []token{{TOKPlus, "+", 0, 1}}},
+	{"/", []token{{TOKDivide, "/", 0, 1}}},
+	{"\u2212", []token{{TOKMinus, "\u2212", 0, 1}}},
+	{"\u00d7", []token{{TOKMultiply, "\u00d7", 0, 1}}},
+	{"\u00f7", []token{{TOKDivide, "\u00f7", 0, 1}}},
+	{"%", []token{{TOKModulo, "%", 0, 1}}},
+	{"//", []token{{TOKDiv, "//", 0, 2}}},
 	{"- 20", []token{
-		{tMinus, "-", 0, 1},
-		{tNumber, "20", 2, 2},
+		{TOKMinus, "-", 0, 1},
+		{TOKNumber, "20", 2, 2},
 	}},
 	// Escaping the delimiter
-	{`"bar\"baz"`, []token{{tQuotedIdentifier, `bar"baz`, 0, 7}}},
-	{",", []token{{tComma, ",", 0, 1}}},
-	{":", []token{{tColon, ":", 0, 1}}},
-	{"<", []token{{tLT, "<", 0, 1}}},
-	{"<=", []token{{tLTE, "<=", 0, 2}}},
-	{">", []token{{tGT, ">", 0, 1}}},
-	{">=", []token{{tGTE, ">=", 0, 2}}},
-	{"==", []token{{tEQ, "==", 0, 2}}},
-	{"!=", []token{{tNE, "!=", 0, 2}}},
-	{"`[0, 1, 2]`", []token{{tJSONLiteral, "[0, 1, 2]", 1, 9}}},
-	{"'foo'", []token{{tStringLiteral, "foo", 1, 3}}},
-	{"'\\\\'", []token{{tStringLiteral, `\`, 1, 1}}},
-	{"'a'", []token{{tStringLiteral, "a", 1, 1}}},
-	{`'foo\'bar'`, []token{{tStringLiteral, "foo'bar", 1, 7}}},
-	{"@", []token{{tCurrent, "@", 0, 1}}},
-	{"$", []token{{tRoot, "$", 0, 1}}},
-	{"&", []token{{tExpref, "&", 0, 1}}},
+	{`"bar\"baz"`, []token{{TOKQuotedIdentifier, `bar"baz`, 0, 7}}},
+	{",", []token{{TOKComma, ",", 0, 1}}},
+	{":", []token{{TOKColon, ":", 0, 1}}},
+	{"<", []token{{TOKLT, "<", 0, 1}}},
+	{"<=", []token{{TOKLTE, "<=", 0, 2}}},
+	{">", []token{{TOKGT, ">", 0, 1}}},
+	{">=", []token{{TOKGTE, ">=", 0, 2}}},
+	{"==", []token{{TOKEQ, "==", 0, 2}}},
+	{"!=", []token{{TOKNE, "!=", 0, 2}}},
+	{"`[0, 1, 2]`", []token{{TOKJSONLiteral, "[0, 1, 2]", 1, 9}}},
+	{"'foo'", []token{{TOKStringLiteral, "foo", 1, 3}}},
+	{"'\\\\'", []token{{TOKStringLiteral, `\`, 1, 1}}},
+	{"'a'", []token{{TOKStringLiteral, "a", 1, 1}}},
+	{`'foo\'bar'`, []token{{TOKStringLiteral, "foo'bar", 1, 7}}},
+	{"@", []token{{TOKCurrent, "@", 0, 1}}},
+	{"$", []token{{TOKRoot, "$", 0, 1}}},
+	{"&", []token{{TOKExpref, "&", 0, 1}}},
 	// Quoted identifier unicode escape sequences
-	{`"\u2713"`, []token{{tQuotedIdentifier, "✓", 0, 3}}},
-	{`"\\"`, []token{{tQuotedIdentifier, `\`, 0, 1}}},
-	{"`\"foo\"`", []token{{tJSONLiteral, "\"foo\"", 1, 5}}},
+	{`"\u2713"`, []token{{TOKQuotedIdentifier, "✓", 0, 3}}},
+	{`"\\"`, []token{{TOKQuotedIdentifier, `\`, 0, 1}}},
+	{"`\"foo\"`", []token{{TOKJSONLiteral, "\"foo\"", 1, 5}}},
 	// Combinations of tokens.
 	{"foo.bar", []token{
-		{tUnquotedIdentifier, "foo", 0, 3},
-		{tDot, ".", 3, 1},
-		{tUnquotedIdentifier, "bar", 4, 3},
+		{TOKUnquotedIdentifier, "foo", 0, 3},
+		{TOKDot, ".", 3, 1},
+		{TOKUnquotedIdentifier, "bar", 4, 3},
 	}},
 	{"foo[0]", []token{
-		{tUnquotedIdentifier, "foo", 0, 3},
-		{tLbracket, "[", 3, 1},
-		{tNumber, "0", 4, 1},
-		{tRbracket, "]", 5, 1},
+		{TOKUnquotedIdentifier, "foo", 0, 3},
+		{TOKLbracket, "[", 3, 1},
+		{TOKNumber, "0", 4, 1},
+		{TOKRbracket, "]", 5, 1},
 	}},
 	{"foo[?a<b]", []token{
-		{tUnquotedIdentifier, "foo", 0, 3},
-		{tFilter, "[?", 3, 2},
-		{tUnquotedIdentifier, "a", 5, 1},
-		{tLT, "<", 6, 1},
-		{tUnquotedIdentifier, "b", 7, 1},
-		{tRbracket, "]", 8, 1},
+		{TOKUnquotedIdentifier, "foo", 0, 3},
+		{TOKFilter, "[?", 3, 2},
+		{TOKUnquotedIdentifier, "a", 5, 1},
+		{TOKLT, "<", 6, 1},
+		{TOKUnquotedIdentifier, "b", 7, 1},
+		{TOKRbracket, "]", 8, 1},
 	}},
 }
 
@@ -89,11 +89,11 @@ func TestCanLexTokens(t *testing.T) {
 	assert := assert.New(t)
 	lexer := NewLexer()
 	for _, tt := range lexingTests {
-		tokens, err := lexer.tokenize(tt.expression)
+		tokens, err := lexer.Tokenize(tt.expression)
 		if assert.Nil(err) {
 			errMsg := fmt.Sprintf("Mismatch expected number of tokens: (expected: %s, actual: %s)",
 				tt.expected, tokens)
-			tt.expected = append(tt.expected, token{tEOF, "", len(tt.expression), 0})
+			tt.expected = append(tt.expected, token{TOKEOF, "", len(tt.expression), 0})
 			if assert.Equal(len(tt.expected), len(tokens), errMsg) {
 				for i, token := range tokens {
 					expected := tt.expected[i]
@@ -116,7 +116,7 @@ func TestLexingErrors(t *testing.T) {
 	assert := assert.New(t)
 	lexer := NewLexer()
 	for _, tt := range lexingErrorTests {
-		_, err := lexer.tokenize(tt.expression)
+		_, err := lexer.Tokenize(tt.expression)
 		assert.NotNil(err, fmt.Sprintf("Expected lexing error: %s", tt.msg))
 	}
 }
@@ -171,7 +171,7 @@ func runLexBenchmark(b *testing.B, expression string) {
 	assert := assert.New(b)
 	lexer := NewLexer()
 	for i := 0; i < b.N; i++ {
-		_, err := lexer.tokenize(expression)
+		_, err := lexer.Tokenize(expression)
 		if err != nil {
 			assert.Fail("Could not lex expression")
 		}

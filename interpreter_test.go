@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/jmespath-community/go-jmespath/pkg/parsing"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -184,7 +185,7 @@ func TestCanSupportSliceOfStructsWithFunctions(t *testing.T) {
 func BenchmarkInterpretSingleFieldStruct(b *testing.B) {
 	assert := assert.New(b)
 	intr := newInterpreter(nil)
-	parser := NewParser()
+	parser := parsing.NewParser()
 	ast, _ := parser.Parse("fooasdfasdfasdfasdf")
 	data := benchmarkStruct{"foobarbazqux"}
 	for i := 0; i < b.N; i++ {
@@ -198,7 +199,7 @@ func BenchmarkInterpretSingleFieldStruct(b *testing.B) {
 func BenchmarkInterpretNestedStruct(b *testing.B) {
 	assert := assert.New(b)
 	intr := newInterpreter(nil)
-	parser := NewParser()
+	parser := parsing.NewParser()
 	ast, _ := parser.Parse("fooasdfasdfasdfasdf.fooasdfasdfasdfasdf.fooasdfasdfasdfasdf.fooasdfasdfasdfasdf")
 	data := benchmarkNested{
 		nestedA{
@@ -223,7 +224,7 @@ func BenchmarkInterpretNestedMaps(b *testing.B) {
 	assert.Nil(err)
 
 	intr := newInterpreter(nil)
-	parser := NewParser()
+	parser := parsing.NewParser()
 	ast, _ := parser.Parse("fooasdfasdfasdfasdf.fooasdfasdfasdfasdf.fooasdfasdfasdfasdf.fooasdfasdfasdfasdf")
 	for i := 0; i < b.N; i++ {
 		_, err := intr.Execute(ast, data)
