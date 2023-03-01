@@ -98,7 +98,7 @@ func computeSliceParams(length int, parts []SliceParam) ([]int, error) {
 	if !parts[2].Specified {
 		step = 1
 	} else if parts[2].N == 0 {
-		return nil, errors.New("Invalid slice, step cannot be 0")
+		return nil, errors.New("invalid slice, step cannot be 0")
 	} else {
 		step = parts[2].N
 	}
