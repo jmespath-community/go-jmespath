@@ -17,33 +17,33 @@ import (
 	"github.com/jmespath-community/go-jmespath/pkg/util"
 )
 
-type jpFunction func(arguments []interface{}) (interface{}, error)
+type JpFunction func(arguments []interface{}) (interface{}, error)
 
-type jpType string
+type JpType string
 
 const (
-	jpNumber      jpType = "number"
-	jpString      jpType = "string"
-	jpArray       jpType = "array"
-	jpObject      jpType = "object"
-	jpArrayArray  jpType = "array[array]"
-	jpArrayNumber jpType = "array[number]"
-	jpArrayString jpType = "array[string]"
-	jpExpref      jpType = "expref"
-	jpAny         jpType = "any"
+	JpNumber      JpType = "number"
+	JpString      JpType = "string"
+	JpArray       JpType = "array"
+	JpObject      JpType = "object"
+	JpArrayArray  JpType = "array[array]"
+	JpArrayNumber JpType = "array[number]"
+	JpArrayString JpType = "array[string]"
+	JpExpref      JpType = "expref"
+	JpAny         JpType = "any"
 )
 
-type functionEntry struct {
-	name      string
-	arguments []argSpec
-	handler   jpFunction
-	hasExpRef bool
+type FunctionEntry struct {
+	Name      string
+	Arguments []ArgSpec
+	Handler   JpFunction
+	HasExpRef bool
 }
 
-type argSpec struct {
-	types    []jpType
-	variadic bool
-	optional bool
+type ArgSpec struct {
+	Types    []JpType
+	Variadic bool
+	Optional bool
 }
 
 type byExprString struct {
@@ -129,366 +129,366 @@ func (a *byExprFloat) Less(i, j int) bool {
 }
 
 type functionCaller struct {
-	functionTable map[string]functionEntry
+	functionTable map[string]FunctionEntry
 	scopes        *scopes
 }
 
 func newFunctionCaller(scopes *scopes) *functionCaller {
 	caller := &functionCaller{scopes: scopes}
-	caller.functionTable = map[string]functionEntry{
+	caller.functionTable = map[string]FunctionEntry{
 		"abs": {
-			name: "abs",
-			arguments: []argSpec{
-				{types: []jpType{jpNumber}},
+			Name: "abs",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpNumber}},
 			},
-			handler: jpfAbs,
+			Handler: jpfAbs,
 		},
 		"avg": {
-			name: "avg",
-			arguments: []argSpec{
-				{types: []jpType{jpArrayNumber}},
+			Name: "avg",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpArrayNumber}},
 			},
-			handler: jpfAvg,
+			Handler: jpfAvg,
 		},
 		"ceil": {
-			name: "ceil",
-			arguments: []argSpec{
-				{types: []jpType{jpNumber}},
+			Name: "ceil",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpNumber}},
 			},
-			handler: jpfCeil,
+			Handler: jpfCeil,
 		},
 		"contains": {
-			name: "contains",
-			arguments: []argSpec{
-				{types: []jpType{jpArray, jpString}},
-				{types: []jpType{jpAny}},
+			Name: "contains",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpArray, JpString}},
+				{Types: []JpType{JpAny}},
 			},
-			handler: jpfContains,
+			Handler: jpfContains,
 		},
 		"ends_with": {
-			name: "ends_with",
-			arguments: []argSpec{
-				{types: []jpType{jpString}},
-				{types: []jpType{jpString}},
+			Name: "ends_with",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpString}},
+				{Types: []JpType{JpString}},
 			},
-			handler: jpfEndsWith,
+			Handler: jpfEndsWith,
 		},
 		"find_first": {
-			name: "find_first",
-			arguments: []argSpec{
-				{types: []jpType{jpString}},
-				{types: []jpType{jpString}},
-				{types: []jpType{jpNumber}, optional: true},
-				{types: []jpType{jpNumber}, optional: true},
+			Name: "find_first",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpString}},
+				{Types: []JpType{JpString}},
+				{Types: []JpType{JpNumber}, Optional: true},
+				{Types: []JpType{JpNumber}, Optional: true},
 			},
-			handler: jpfFindFirst,
+			Handler: jpfFindFirst,
 		},
 		"find_last": {
-			name: "find_last",
-			arguments: []argSpec{
-				{types: []jpType{jpString}},
-				{types: []jpType{jpString}},
-				{types: []jpType{jpNumber}, optional: true},
-				{types: []jpType{jpNumber}, optional: true},
+			Name: "find_last",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpString}},
+				{Types: []JpType{JpString}},
+				{Types: []JpType{JpNumber}, Optional: true},
+				{Types: []JpType{JpNumber}, Optional: true},
 			},
-			handler: jpfFindLast,
+			Handler: jpfFindLast,
 		},
 		"floor": {
-			name: "floor",
-			arguments: []argSpec{
-				{types: []jpType{jpNumber}},
+			Name: "floor",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpNumber}},
 			},
-			handler: jpfFloor,
+			Handler: jpfFloor,
 		},
 		"from_items": {
-			name: "from_items",
-			arguments: []argSpec{
-				{types: []jpType{jpArrayArray}},
+			Name: "from_items",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpArrayArray}},
 			},
-			handler: jpfFromItems,
+			Handler: jpfFromItems,
 		},
 		"group_by": {
-			name: "group_by",
-			arguments: []argSpec{
-				{types: []jpType{jpArray}},
-				{types: []jpType{jpExpref}},
+			Name: "group_by",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpArray}},
+				{Types: []JpType{JpExpref}},
 			},
-			handler:   jpfGroupBy,
-			hasExpRef: true,
+			Handler:   jpfGroupBy,
+			HasExpRef: true,
 		},
 		"items": {
-			name: "items",
-			arguments: []argSpec{
-				{types: []jpType{jpObject}},
+			Name: "items",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpObject}},
 			},
-			handler: jpfItems,
+			Handler: jpfItems,
 		},
 		"join": {
-			name: "join",
-			arguments: []argSpec{
-				{types: []jpType{jpString}},
-				{types: []jpType{jpArrayString}},
+			Name: "join",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpString}},
+				{Types: []JpType{JpArrayString}},
 			},
-			handler: jpfJoin,
+			Handler: jpfJoin,
 		},
 		"keys": {
-			name: "keys",
-			arguments: []argSpec{
-				{types: []jpType{jpObject}},
+			Name: "keys",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpObject}},
 			},
-			handler: jpfKeys,
+			Handler: jpfKeys,
 		},
 		"length": {
-			name: "length",
-			arguments: []argSpec{
-				{types: []jpType{jpString, jpArray, jpObject}},
+			Name: "length",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpString, JpArray, JpObject}},
 			},
-			handler: jpfLength,
+			Handler: jpfLength,
 		},
 		"lower": {
-			name: "lower",
-			arguments: []argSpec{
-				{types: []jpType{jpString}},
+			Name: "lower",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpString}},
 			},
-			handler: jpfLower,
+			Handler: jpfLower,
 		},
 		"let": {
-			name: "let",
-			arguments: []argSpec{
-				{types: []jpType{jpObject}},
-				{types: []jpType{jpExpref}},
+			Name: "let",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpObject}},
+				{Types: []JpType{JpExpref}},
 			},
-			handler:   caller.jpfLet,
-			hasExpRef: true,
+			Handler:   caller.jpfLet,
+			HasExpRef: true,
 		},
 		"map": {
-			name: "amp",
-			arguments: []argSpec{
-				{types: []jpType{jpExpref}},
-				{types: []jpType{jpArray}},
+			Name: "amp",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpExpref}},
+				{Types: []JpType{JpArray}},
 			},
-			handler:   jpfMap,
-			hasExpRef: true,
+			Handler:   jpfMap,
+			HasExpRef: true,
 		},
 		"max": {
-			name: "max",
-			arguments: []argSpec{
-				{types: []jpType{jpArrayNumber, jpArrayString}},
+			Name: "max",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpArrayNumber, JpArrayString}},
 			},
-			handler: jpfMax,
+			Handler: jpfMax,
 		},
 		"max_by": {
-			name: "max_by",
-			arguments: []argSpec{
-				{types: []jpType{jpArray}},
-				{types: []jpType{jpExpref}},
+			Name: "max_by",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpArray}},
+				{Types: []JpType{JpExpref}},
 			},
-			handler:   jpfMaxBy,
-			hasExpRef: true,
+			Handler:   jpfMaxBy,
+			HasExpRef: true,
 		},
 		"merge": {
-			name: "merge",
-			arguments: []argSpec{
-				{types: []jpType{jpObject}, variadic: true},
+			Name: "merge",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpObject}, Variadic: true},
 			},
-			handler: jpfMerge,
+			Handler: jpfMerge,
 		},
 		"min": {
-			name: "min",
-			arguments: []argSpec{
-				{types: []jpType{jpArrayNumber, jpArrayString}},
+			Name: "min",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpArrayNumber, JpArrayString}},
 			},
-			handler: jpfMin,
+			Handler: jpfMin,
 		},
 		"min_by": {
-			name: "min_by",
-			arguments: []argSpec{
-				{types: []jpType{jpArray}},
-				{types: []jpType{jpExpref}},
+			Name: "min_by",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpArray}},
+				{Types: []JpType{JpExpref}},
 			},
-			handler:   jpfMinBy,
-			hasExpRef: true,
+			Handler:   jpfMinBy,
+			HasExpRef: true,
 		},
 		"not_null": {
-			name: "not_null",
-			arguments: []argSpec{
-				{types: []jpType{jpAny}, variadic: true},
+			Name: "not_null",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpAny}, Variadic: true},
 			},
-			handler: jpfNotNull,
+			Handler: jpfNotNull,
 		},
 		"pad_left": {
-			name: "pad_left",
-			arguments: []argSpec{
-				{types: []jpType{jpString}},
-				{types: []jpType{jpNumber}},
-				{types: []jpType{jpString}, optional: true},
+			Name: "pad_left",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpString}},
+				{Types: []JpType{JpNumber}},
+				{Types: []JpType{JpString}, Optional: true},
 			},
-			handler: jpfPadLeft,
+			Handler: jpfPadLeft,
 		},
 		"pad_right": {
-			name: "pad_right",
-			arguments: []argSpec{
-				{types: []jpType{jpString}},
-				{types: []jpType{jpNumber}},
-				{types: []jpType{jpString}, optional: true},
+			Name: "pad_right",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpString}},
+				{Types: []JpType{JpNumber}},
+				{Types: []JpType{JpString}, Optional: true},
 			},
-			handler: jpfPadRight,
+			Handler: jpfPadRight,
 		},
 		"replace": {
-			name: "replace",
-			arguments: []argSpec{
-				{types: []jpType{jpString}},
-				{types: []jpType{jpString}},
-				{types: []jpType{jpString}},
-				{types: []jpType{jpNumber}, optional: true},
+			Name: "replace",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpString}},
+				{Types: []JpType{JpString}},
+				{Types: []JpType{JpString}},
+				{Types: []JpType{JpNumber}, Optional: true},
 			},
-			handler: jpfReplace,
+			Handler: jpfReplace,
 		},
 		"reverse": {
-			name: "reverse",
-			arguments: []argSpec{
-				{types: []jpType{jpArray, jpString}},
+			Name: "reverse",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpArray, JpString}},
 			},
-			handler: jpfReverse,
+			Handler: jpfReverse,
 		},
 		"sort": {
-			name: "sort",
-			arguments: []argSpec{
-				{types: []jpType{jpArrayString, jpArrayNumber}},
+			Name: "sort",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpArrayString, JpArrayNumber}},
 			},
-			handler: jpfSort,
+			Handler: jpfSort,
 		},
 		"sort_by": {
-			name: "sort_by",
-			arguments: []argSpec{
-				{types: []jpType{jpArray}},
-				{types: []jpType{jpExpref}},
+			Name: "sort_by",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpArray}},
+				{Types: []JpType{JpExpref}},
 			},
-			handler:   jpfSortBy,
-			hasExpRef: true,
+			Handler:   jpfSortBy,
+			HasExpRef: true,
 		},
 		"split": {
-			name: "split",
-			arguments: []argSpec{
-				{types: []jpType{jpString}},
-				{types: []jpType{jpString}},
-				{types: []jpType{jpNumber}, optional: true},
+			Name: "split",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpString}},
+				{Types: []JpType{JpString}},
+				{Types: []JpType{JpNumber}, Optional: true},
 			},
-			handler: jpfSplit,
+			Handler: jpfSplit,
 		},
 		"starts_with": {
-			name: "starts_with",
-			arguments: []argSpec{
-				{types: []jpType{jpString}},
-				{types: []jpType{jpString}},
+			Name: "starts_with",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpString}},
+				{Types: []JpType{JpString}},
 			},
-			handler: jpfStartsWith,
+			Handler: jpfStartsWith,
 		},
 		"sum": {
-			name: "sum",
-			arguments: []argSpec{
-				{types: []jpType{jpArrayNumber}},
+			Name: "sum",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpArrayNumber}},
 			},
-			handler: jpfSum,
+			Handler: jpfSum,
 		},
 		"to_array": {
-			name: "to_array",
-			arguments: []argSpec{
-				{types: []jpType{jpAny}},
+			Name: "to_array",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpAny}},
 			},
-			handler: jpfToArray,
+			Handler: jpfToArray,
 		},
 		"to_number": {
-			name: "to_number",
-			arguments: []argSpec{
-				{types: []jpType{jpAny}},
+			Name: "to_number",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpAny}},
 			},
-			handler: jpfToNumber,
+			Handler: jpfToNumber,
 		},
 		"to_string": {
-			name: "to_string",
-			arguments: []argSpec{
-				{types: []jpType{jpAny}},
+			Name: "to_string",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpAny}},
 			},
-			handler: jpfToString,
+			Handler: jpfToString,
 		},
 		"trim": {
-			name: "trim",
-			arguments: []argSpec{
-				{types: []jpType{jpString}},
-				{types: []jpType{jpString}, optional: true},
+			Name: "trim",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpString}},
+				{Types: []JpType{JpString}, Optional: true},
 			},
-			handler: jpfTrim,
+			Handler: jpfTrim,
 		},
 		"trim_left": {
-			name: "trim_left",
-			arguments: []argSpec{
-				{types: []jpType{jpString}},
-				{types: []jpType{jpString}, optional: true},
+			Name: "trim_left",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpString}},
+				{Types: []JpType{JpString}, Optional: true},
 			},
-			handler: jpfTrimLeft,
+			Handler: jpfTrimLeft,
 		},
 		"trim_right": {
-			name: "trim_right",
-			arguments: []argSpec{
-				{types: []jpType{jpString}},
-				{types: []jpType{jpString}, optional: true},
+			Name: "trim_right",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpString}},
+				{Types: []JpType{JpString}, Optional: true},
 			},
-			handler: jpfTrimRight,
+			Handler: jpfTrimRight,
 		},
 		"type": {
-			name: "type",
-			arguments: []argSpec{
-				{types: []jpType{jpAny}},
+			Name: "type",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpAny}},
 			},
-			handler: jpfType,
+			Handler: jpfType,
 		},
 		"upper": {
-			name: "upper",
-			arguments: []argSpec{
-				{types: []jpType{jpString}},
+			Name: "upper",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpString}},
 			},
-			handler: jpfUpper,
+			Handler: jpfUpper,
 		},
 		"values": {
-			name: "values",
-			arguments: []argSpec{
-				{types: []jpType{jpObject}},
+			Name: "values",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpObject}},
 			},
-			handler: jpfValues,
+			Handler: jpfValues,
 		},
 		"zip": {
-			name: "zip",
-			arguments: []argSpec{
-				{types: []jpType{jpArray}},
-				{types: []jpType{jpArray}, variadic: true},
+			Name: "zip",
+			Arguments: []ArgSpec{
+				{Types: []JpType{JpArray}},
+				{Types: []JpType{JpArray}, Variadic: true},
 			},
-			handler: jpfZip,
+			Handler: jpfZip,
 		},
 	}
 	return caller
 }
 
-func (e *functionEntry) resolveArgs(arguments []interface{}) ([]interface{}, error) {
-	if len(e.arguments) == 0 {
+func (e *FunctionEntry) resolveArgs(arguments []interface{}) ([]interface{}, error) {
+	if len(e.Arguments) == 0 {
 		return arguments, nil
 	}
 
-	variadic := isVariadic(e.arguments)
-	minExpected := getMinExpected(e.arguments)
-	maxExpected, hasMax := getMaxExpected(e.arguments)
+	variadic := isVariadic(e.Arguments)
+	minExpected := getMinExpected(e.Arguments)
+	maxExpected, hasMax := getMaxExpected(e.Arguments)
 	count := len(arguments)
 
 	if count < minExpected {
-		return nil, jperror.NotEnoughArgumentsSupplied(e.name, count, minExpected, variadic)
+		return nil, jperror.NotEnoughArgumentsSupplied(e.Name, count, minExpected, variadic)
 	}
 
 	if hasMax && count > maxExpected {
-		return nil, jperror.TooManyArgumentsSupplied(e.name, count, maxExpected)
+		return nil, jperror.TooManyArgumentsSupplied(e.Name, count, maxExpected)
 	}
 
-	for i, spec := range e.arguments {
-		if !spec.optional || i <= len(arguments)-1 {
+	for i, spec := range e.Arguments {
+		if !spec.Optional || i <= len(arguments)-1 {
 			userArg := arguments[i]
 			err := spec.typeCheck(userArg)
 			if err != nil {
@@ -496,10 +496,10 @@ func (e *functionEntry) resolveArgs(arguments []interface{}) ([]interface{}, err
 			}
 		}
 	}
-	lastIndex := len(e.arguments) - 1
-	lastArg := e.arguments[lastIndex]
-	if lastArg.variadic {
-		for i := len(e.arguments) - 1; i < len(arguments); i++ {
+	lastIndex := len(e.Arguments) - 1
+	lastArg := e.Arguments[lastIndex]
+	if lastArg.Variadic {
+		for i := len(e.Arguments) - 1; i < len(arguments); i++ {
 			userArg := arguments[i]
 			err := lastArg.typeCheck(userArg)
 			if err != nil {
@@ -510,26 +510,26 @@ func (e *functionEntry) resolveArgs(arguments []interface{}) ([]interface{}, err
 	return arguments, nil
 }
 
-func isVariadic(arguments []argSpec) bool {
+func isVariadic(arguments []ArgSpec) bool {
 	for _, spec := range arguments {
-		if spec.variadic {
+		if spec.Variadic {
 			return true
 		}
 	}
 	return false
 }
 
-func getMinExpected(arguments []argSpec) int {
+func getMinExpected(arguments []ArgSpec) int {
 	expected := 0
 	for _, spec := range arguments {
-		if !spec.optional {
+		if !spec.Optional {
 			expected++
 		}
 	}
 	return expected
 }
 
-func getMaxExpected(arguments []argSpec) (int, bool) {
+func getMaxExpected(arguments []ArgSpec) (int, bool) {
 	if isVariadic(arguments) {
 		return 0, false
 	} else {
@@ -537,48 +537,48 @@ func getMaxExpected(arguments []argSpec) (int, bool) {
 	}
 }
 
-func (a *argSpec) typeCheck(arg interface{}) error {
-	for _, t := range a.types {
+func (a *ArgSpec) typeCheck(arg interface{}) error {
+	for _, t := range a.Types {
 		switch t {
-		case jpNumber:
+		case JpNumber:
 			if _, ok := arg.(float64); ok {
 				return nil
 			}
-		case jpString:
+		case JpString:
 			if _, ok := arg.(string); ok {
 				return nil
 			}
-		case jpArray:
+		case JpArray:
 			if util.IsSliceType(arg) {
 				return nil
 			}
-		case jpObject:
+		case JpObject:
 			if _, ok := arg.(map[string]interface{}); ok {
 				return nil
 			}
-		case jpArrayArray:
+		case JpArrayArray:
 			if util.IsSliceType(arg) {
 				if _, ok := arg.([]interface{}); ok {
 					return nil
 				}
 			}
-		case jpArrayNumber:
+		case JpArrayNumber:
 			if _, ok := util.ToArrayNum(arg); ok {
 				return nil
 			}
-		case jpArrayString:
+		case JpArrayString:
 			if _, ok := util.ToArrayStr(arg); ok {
 				return nil
 			}
-		case jpAny:
+		case JpAny:
 			return nil
-		case jpExpref:
+		case JpExpref:
 			if _, ok := arg.(expRef); ok {
 				return nil
 			}
 		}
 	}
-	return fmt.Errorf("invalid type for: %v, expected: %#v", arg, a.types)
+	return fmt.Errorf("invalid type for: %v, expected: %#v", arg, a.Types)
 }
 
 func (f *functionCaller) CallFunction(name string, arguments []interface{}, intr Interpreter) (interface{}, error) {
@@ -590,12 +590,12 @@ func (f *functionCaller) CallFunction(name string, arguments []interface{}, intr
 	if err != nil {
 		return nil, err
 	}
-	if entry.hasExpRef {
+	if entry.HasExpRef {
 		var extra []interface{}
 		extra = append(extra, intr)
 		resolvedArgs = append(extra, resolvedArgs...)
 	}
-	return entry.handler(resolvedArgs)
+	return entry.Handler(resolvedArgs)
 }
 
 func jpfAbs(arguments []interface{}) (interface{}, error) {
