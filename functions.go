@@ -12,6 +12,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	jperror "github.com/jmespath-community/go-jmespath/pkg/error"
 	"github.com/jmespath-community/go-jmespath/pkg/util"
 )
 
@@ -474,11 +475,11 @@ func (e *functionEntry) resolveArgs(arguments []interface{}) ([]interface{}, err
 	count := len(arguments)
 
 	if count < minExpected {
-		return nil, notEnoughArgumentsSupplied(e.name, count, minExpected, variadic)
+		return nil, jperror.NotEnoughArgumentsSupplied(e.name, count, minExpected, variadic)
 	}
 
 	if hasMax && count > maxExpected {
-		return nil, tooManyArgumentsSupplied(e.name, count, maxExpected)
+		return nil, jperror.TooManyArgumentsSupplied(e.name, count, maxExpected)
 	}
 
 	for i, spec := range e.arguments {
@@ -653,7 +654,7 @@ func jpfFindImpl(name string, arguments []interface{}, find func(s string, subst
 	if startSpecified {
 		num, ok := util.ToInteger(arguments[2])
 		if !ok {
-			return nil, notAnInteger(name, "start")
+			return nil, jperror.NotAnInteger(name, "start")
 		}
 		start = util.Max(0, num)
 	}
@@ -662,7 +663,7 @@ func jpfFindImpl(name string, arguments []interface{}, find func(s string, subst
 	if endSpecified {
 		num, ok := util.ToInteger(arguments[3])
 		if !ok {
-			return nil, notAnInteger(name, "end")
+			return nil, jperror.NotAnInteger(name, "end")
 		}
 		end = util.Min(num, len(subject))
 	}
@@ -1017,7 +1018,7 @@ func jpfPadImpl(
 	s := arguments[0].(string)
 	width, ok := util.ToPositiveInteger(arguments[1])
 	if !ok {
-		return nil, notAPositiveInteger(name, "width")
+		return nil, jperror.NotAPositiveInteger(name, "width")
 	}
 	chars := " "
 	if len(arguments) > 2 {
@@ -1057,7 +1058,7 @@ func jpfReplace(arguments []interface{}) (interface{}, error) {
 	if len(arguments) > 3 {
 		num, ok := util.ToPositiveInteger(arguments[3])
 		if !ok {
-			return nil, notAPositiveInteger("replace", "count")
+			return nil, jperror.NotAPositiveInteger("replace", "count")
 		}
 		count = num
 	}
@@ -1148,7 +1149,7 @@ func jpfSplit(arguments []interface{}) (interface{}, error) {
 	if nSpecified {
 		num, ok := util.ToPositiveInteger(arguments[2])
 		if !ok {
-			return nil, notAPositiveInteger("split", "count")
+			return nil, jperror.NotAPositiveInteger("split", "count")
 		}
 		n = num
 	}
