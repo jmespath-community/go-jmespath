@@ -141,7 +141,7 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 			}
 			resolvedArgs = append(resolvedArgs, current)
 		}
-		return intr.fCall.CallFunction(node.Value.(string), resolvedArgs, intr)
+		return intr.fCall.callFunction(node.Value.(string), resolvedArgs, intr)
 	case parsing.ASTField:
 		key := node.Value.(string)
 		var result interface{}

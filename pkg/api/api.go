@@ -15,7 +15,15 @@ type JMESPath interface {
 }
 
 type jmesPath struct {
-	ast parsing.ASTNode
+	node  parsing.ASTNode
+	funcs []functions.FunctionEntry
+}
+
+func newJMESPath(node parsing.ASTNode, funcs ...functions.FunctionEntry) JMESPath {
+	return jmesPath{
+		node:  node,
+		funcs: funcs,
+	}
 }
 
 // Compile parses a JMESPath expression and returns, if successful, a JMESPath
@@ -26,7 +34,7 @@ func Compile(expression string) (JMESPath, error) {
 	if err != nil {
 		return nil, err
 	}
-	return jmesPath{ast: ast}, nil
+	return newJMESPath(ast, functions.GetDefaultFunctions()...), nil
 }
 
 // MustCompile is like Compile but panics if the expression cannot be parsed.
@@ -42,8 +50,8 @@ func MustCompile(expression string) JMESPath {
 
 // Search evaluates a JMESPath expression against input data and returns the result.
 func (jp jmesPath) Search(data interface{}) (interface{}, error) {
-	intr := interpreter.NewInterpreter(data, functions.Default...)
-	return intr.Execute(jp.ast, data)
+	intr := interpreter.NewInterpreter(data, jp.funcs...)
+	return intr.Execute(jp.node, data)
 }
 
 // Search evaluates a JMESPath expression against input data and returns the result.

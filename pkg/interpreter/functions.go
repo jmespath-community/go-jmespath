@@ -143,7 +143,7 @@ func typeCheck(a functions.ArgSpec, arg interface{}) error {
 	return fmt.Errorf("invalid type for: %v, expected: %#v", arg, a.Types)
 }
 
-func (f *functionCaller) CallFunction(name string, arguments []interface{}, intr Interpreter) (interface{}, error) {
+func (f *functionCaller) callFunction(name string, arguments []interface{}, intr Interpreter) (interface{}, error) {
 	entry, ok := f.functionTable[name]
 	if !ok {
 		return nil, errors.New("unknown function: " + name)
