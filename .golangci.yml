@@ -40,6 +40,15 @@ linters:
     - gofumpt
 
 
+    - prealloc
+    # - predeclared
+    - promlinter
+    - reassign
+    # - revive
+    - rowserrcheck
+    # - scopelint
+    - sqlclosecheck
+    - staticcheck
     # - structcheck
     - stylecheck
     - tagliatelle
@@ -49,7 +58,6 @@ linters:
     - thelper
     - tparallel
     - typecheck
-
     - unconvert
     # - unparam
     - unused
