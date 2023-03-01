@@ -17,7 +17,7 @@ import (
 	"github.com/jmespath-community/go-jmespath/pkg/util"
 )
 
-type JpFunction func(arguments []interface{}) (interface{}, error)
+type JpFunction = func(arguments []interface{}) (interface{}, error)
 
 type JpType string
 
