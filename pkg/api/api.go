@@ -3,6 +3,7 @@ package api
 import (
 	"strconv"
 
+	"github.com/jmespath-community/go-jmespath/pkg/functions"
 	"github.com/jmespath-community/go-jmespath/pkg/interpreter"
 	"github.com/jmespath-community/go-jmespath/pkg/parsing"
 )
@@ -41,7 +42,7 @@ func MustCompile(expression string) JMESPath {
 
 // Search evaluates a JMESPath expression against input data and returns the result.
 func (jp jmesPath) Search(data interface{}) (interface{}, error) {
-	intr := interpreter.NewInterpreter(data)
+	intr := interpreter.NewInterpreter(data, functions.Default...)
 	return intr.Execute(jp.ast, data)
 }
 
