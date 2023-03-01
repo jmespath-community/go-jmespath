@@ -66,7 +66,7 @@ var prettyPrintedCompNode = `ASTFilterProjection {
     ASTIdentity {
     }
     ASTComparator {
-      value: tLTE
+      value: TOKLTE
       children: {
         ASTField {
           value: "b"
