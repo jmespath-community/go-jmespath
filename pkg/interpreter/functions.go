@@ -797,9 +797,9 @@ func (f *functionCaller) jpfLet(arguments []interface{}) (interface{}, error) {
 	context := exp.context
 
 	result, err := intr.WithScope(scope).Execute(node, context)
+	if err != nil {
 		return nil, err
 	}
-
 	return result, nil
 }
 
