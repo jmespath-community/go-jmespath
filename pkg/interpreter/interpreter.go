@@ -11,16 +11,21 @@ import (
 	"github.com/jmespath-community/go-jmespath/pkg/util"
 )
 
-/* This is a tree based interpreter.  It walks the AST and directly
-   interprets the AST to search through a JSON document.
+/*
+This is a tree based interpreter.  It walks the AST and directly
+
+	interprets the AST to search through a JSON document.
 */
+type Interpreter interface {
+	Execute(parsing.ASTNode, interface{}) (interface{}, error)
+}
 
 type treeInterpreter struct {
 	fCall  *functionCaller
 	scopes *scopes
 }
 
-func NewInterpreter(data interface{}) *treeInterpreter {
+func NewInterpreter(data interface{}) Interpreter {
 	interpreter := treeInterpreter{
 		scopes: newScopes(),
 	}
