@@ -58,6 +58,12 @@ func TestSearch(t *testing.T) {
 			expression: "not a valid expression",
 		},
 		wantErr: true,
+	}, {
+		args: args{
+			expression: "let({root: @}, &root).root",
+			data:       map[string]interface{}{},
+		},
+		wantErr: false,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
