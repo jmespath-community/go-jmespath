@@ -148,10 +148,7 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 				return result, nil
 			}
 		}
-		result, err := intr.fieldFromStruct(node.Value.(string), value)
-		if err != nil {
-			return nil, err
-		}
+		result = intr.fieldFromStruct(node.Value.(string), value)
 		if result != nil {
 			return result, nil
 		}
@@ -432,29 +429,29 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 	return nil, errors.New("Unknown AST node: " + node.NodeType.String())
 }
 
-func (intr *treeInterpreter) fieldFromStruct(key string, value interface{}) (interface{}, error) {
+func (intr *treeInterpreter) fieldFromStruct(key string, value interface{}) interface{} {
 	rv := reflect.ValueOf(value)
 	first, n := utf8.DecodeRuneInString(key)
 	fieldName := string(unicode.ToUpper(first)) + key[n:]
 	if rv.Kind() == reflect.Struct {
 		v := rv.FieldByName(fieldName)
 		if !v.IsValid() {
-			return nil, nil
+			return nil
 		}
-		return v.Interface(), nil
+		return v.Interface()
 	} else if rv.Kind() == reflect.Ptr {
 		// Handle multiple levels of indirection?
 		if rv.IsNil() {
-			return nil, nil
+			return nil
 		}
 		rv = rv.Elem()
 		v := rv.FieldByName(fieldName)
 		if !v.IsValid() {
-			return nil, nil
+			return nil
 		}
-		return v.Interface(), nil
+		return v.Interface()
 	}
-	return nil, nil
+	return nil
 }
 
 func (intr *treeInterpreter) flattenWithReflection(value interface{}) (interface{}, error) {

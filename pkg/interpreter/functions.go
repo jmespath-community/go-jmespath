@@ -527,7 +527,7 @@ func getMaxExpected(arguments []argSpec) (int, bool) {
 	if isVariadic(arguments) {
 		return 0, false
 	} else {
-		return int(len(arguments)), true
+		return len(arguments), true
 	}
 }
 

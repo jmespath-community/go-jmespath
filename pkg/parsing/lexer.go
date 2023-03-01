@@ -406,7 +406,7 @@ func (lexer *Lexer) consumeQuotedIdentifier() (token, error) {
 	}
 	var decoded string
 	asJSON := []byte("\"" + value + "\"")
-	if err := json.Unmarshal([]byte(asJSON), &decoded); err != nil {
+	if err := json.Unmarshal(asJSON, &decoded); err != nil {
 		return token{}, err
 	}
 	return token{
