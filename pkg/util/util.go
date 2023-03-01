@@ -1,4 +1,4 @@
-package jmespath
+package util
 
 import (
 	"errors"
@@ -13,7 +13,7 @@ import (
 // - An empty string array, or hash.
 // - The boolean value false.
 // - nil
-func isFalse(value interface{}) bool {
+func IsFalse(value interface{}) bool {
 	switch v := value.(type) {
 	case bool:
 		return !v
@@ -42,7 +42,7 @@ func isFalse(value interface{}) bool {
 		// If it's a pointer type, we'll try to deref the pointer
 		// and evaluate the pointer value for isFalse.
 		element := rv.Elem()
-		return isFalse(element.Interface())
+		return IsFalse(element.Interface())
 	}
 	return false
 }
@@ -50,20 +50,20 @@ func isFalse(value interface{}) bool {
 // ObjsEqual is a generic object equality check.
 // It will take two arbitrary objects and recursively determine
 // if they are equal.
-func objsEqual(left interface{}, right interface{}) bool {
+func ObjsEqual(left interface{}, right interface{}) bool {
 	return reflect.DeepEqual(left, right)
 }
 
 // SliceParam refers to a single part of a slice.
 // A slice consists of a start, a stop, and a step, similar to
 // python slices.
-type sliceParam struct {
+type SliceParam struct {
 	N         int
 	Specified bool
 }
 
 // Slice supports [start:stop:step] style slicing that's supported in JMESPath.
-func slice[T interface{} | rune](slice []T, parts []sliceParam) ([]T, error) {
+func Slice[T interface{} | rune](slice []T, parts []SliceParam) ([]T, error) {
 	computed, err := computeSliceParams(len(slice), parts)
 	if err != nil {
 		return nil, err
@@ -82,8 +82,8 @@ func slice[T interface{} | rune](slice []T, parts []sliceParam) ([]T, error) {
 	return result, nil
 }
 
-func makeSliceParams(parts []*int) []sliceParam {
-	sliceParams := make([]sliceParam, 3)
+func MakeSliceParams(parts []*int) []SliceParam {
+	sliceParams := make([]SliceParam, 3)
 	for i, part := range parts {
 		if part != nil {
 			sliceParams[i].Specified = true
@@ -93,7 +93,7 @@ func makeSliceParams(parts []*int) []sliceParam {
 	return sliceParams
 }
 
-func computeSliceParams(length int, parts []sliceParam) ([]int, error) {
+func computeSliceParams(length int, parts []SliceParam) ([]int, error) {
 	var start, stop, step int
 	if !parts[2].Specified {
 		step = 1
@@ -151,10 +151,10 @@ func capSlice(length int, actual int, step int) int {
 	return actual
 }
 
-// toArrayArray converts an empty interface type to a slice of slices.
+// ToArrayArray converts an empty interface type to a slice of slices.
 // If any element in the array cannot be converted, then nil is returned
 // along with a second value of false.
-func toArrayArray(data interface{}) ([][]interface{}, bool) {
+func ToArrayArray(data interface{}) ([][]interface{}, bool) {
 	result := [][]interface{}{}
 	arr, ok := data.([]interface{})
 	if !ok {
@@ -173,7 +173,7 @@ func toArrayArray(data interface{}) ([][]interface{}, bool) {
 // ToArrayNum converts an empty interface type to a slice of float64.
 // If any element in the array cannot be converted, then nil is returned
 // along with a second value of false.
-func toArrayNum(data interface{}) ([]float64, bool) {
+func ToArrayNum(data interface{}) ([]float64, bool) {
 	// Is there a better way to do this with reflect?
 	if d, ok := data.([]interface{}); ok {
 		result := make([]float64, len(d))
@@ -194,7 +194,7 @@ func toArrayNum(data interface{}) ([]float64, bool) {
 // along with a second value of false.  If the input data could be entirely
 // converted, then the converted data, along with a second value of true,
 // will be returned.
-func toArrayStr(data interface{}) ([]string, bool) {
+func ToArrayStr(data interface{}) ([]string, bool) {
 	// Is there a better way to do this with reflect?
 	if d, ok := data.([]interface{}); ok {
 		result := make([]string, len(d))
@@ -210,11 +210,11 @@ func toArrayStr(data interface{}) ([]string, bool) {
 	return nil, false
 }
 
-// toInteger converts an empty interface to a integer.
+// ToInteger converts an empty interface to a integer.
 // It expects the empty interface to represent a float64 JSON number.
 // If the empty interface cannot be converted or if the number
 // is not an integer, the function returns a second boolean value false.
-func toInteger(v interface{}) (int, bool) {
+func ToInteger(v interface{}) (int, bool) {
 	if num, ok := v.(float64); ok {
 		if math.Floor(num) != num {
 			return 0, false
@@ -223,25 +223,26 @@ func toInteger(v interface{}) (int, bool) {
 	}
 	return 0, false
 }
-func toPositiveInteger(v interface{}) (int, bool) {
-	num, ok := toInteger(v)
+
+func ToPositiveInteger(v interface{}) (int, bool) {
+	num, ok := ToInteger(v)
 	return num, ok && num >= 0
 }
 
-func isSliceType(v interface{}) bool {
+func IsSliceType(v interface{}) bool {
 	if v == nil {
 		return false
 	}
 	return reflect.TypeOf(v).Kind() == reflect.Slice
 }
 
-func min[T constraints.Ordered](a T, b T) T {
+func Min[T constraints.Ordered](a T, b T) T {
 	if a < b {
 		return a
 	}
 	return b
 }
-func max[T constraints.Ordered](a T, b T) T {
+func Max[T constraints.Ordered](a T, b T) T {
 	if a > b {
 		return a
 	}

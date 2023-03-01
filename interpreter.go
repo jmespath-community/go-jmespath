@@ -6,6 +6,8 @@ import (
 	"reflect"
 	"unicode"
 	"unicode/utf8"
+
+	"github.com/jmespath-community/go-jmespath/pkg/util"
 )
 
 /* This is a tree based interpreter.  It walks the AST and directly
@@ -97,9 +99,9 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 		}
 		switch node.value {
 		case tEQ:
-			return objsEqual(left, right), nil
+			return util.ObjsEqual(left, right), nil
 		case tNE:
-			return !objsEqual(left, right), nil
+			return !util.ObjsEqual(left, right), nil
 		}
 		leftNum, ok := left.(float64)
 		if !ok {
@@ -158,7 +160,7 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 		}
 		sliceType, ok := left.([]interface{})
 		if !ok {
-			if isSliceType(left) {
+			if util.IsSliceType(left) {
 				return intr.filterProjectionWithReflection(node, left)
 			}
 			return nil, nil
@@ -170,7 +172,7 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 			if err != nil {
 				return nil, err
 			}
-			if !isFalse(result) {
+			if !util.IsFalse(result) {
 				current, err := intr.Execute(node.children[1], element)
 				if err != nil {
 					return nil, err
@@ -191,7 +193,7 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 			// If we can't type convert to []interface{}, there's
 			// a chance this could still work via reflection if we're
 			// dealing with user provided types.
-			if isSliceType(left) {
+			if util.IsSliceType(left) {
 				return intr.flattenWithReflection(left)
 			}
 			return nil, nil
@@ -200,7 +202,7 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 		for _, element := range sliceType {
 			if elementSlice, ok := element.([]interface{}); ok {
 				flattened = append(flattened, elementSlice...)
-			} else if isSliceType(element) {
+			} else if util.IsSliceType(element) {
 				reflectFlat := []interface{}{}
 				v := reflect.ValueOf(element)
 				for i := 0; i < v.Len(); i++ {
@@ -276,7 +278,7 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 		if err != nil {
 			return nil, err
 		}
-		if isFalse(matched) {
+		if util.IsFalse(matched) {
 			matched, err = intr.Execute(node.children[1], value)
 			if err != nil {
 				return nil, err
@@ -288,7 +290,7 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 		if err != nil {
 			return nil, err
 		}
-		if isFalse(matched) {
+		if util.IsFalse(matched) {
 			return matched, nil
 		}
 		return intr.Execute(node.children[1], value)
@@ -297,7 +299,7 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 		if err != nil {
 			return nil, err
 		}
-		if isFalse(matched) {
+		if util.IsFalse(matched) {
 			return true, nil
 		}
 		return false, nil
@@ -338,7 +340,7 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 
 		sliceType, ok := left.([]interface{})
 		if !ok {
-			if isSliceType(left) {
+			if util.IsSliceType(left) {
 				return intr.projectWithReflection(node, left)
 			}
 			stringType, ok := left.(string)
@@ -373,7 +375,7 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 		parts := node.value.([]*int)
 		sliceType, ok := value.([]interface{})
 		if !ok {
-			if isSliceType(value) {
+			if util.IsSliceType(value) {
 				return intr.sliceWithReflection(node, value)
 			} else {
 
@@ -383,8 +385,8 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 
 				if stringType, ok := value.(string); ok {
 					runeType := []rune(stringType)
-					sliceParams := makeSliceParams(parts)
-					runes, err := slice(runeType, sliceParams)
+					sliceParams := util.MakeSliceParams(parts)
+					runes, err := util.Slice(runeType, sliceParams)
 					if err != nil {
 						return nil, nil
 					}
@@ -394,8 +396,8 @@ func (intr *treeInterpreter) Execute(node ASTNode, value interface{}) (interface
 				}
 			}
 		}
-		sliceParams := makeSliceParams(parts)
-		return slice(sliceType, sliceParams)
+		sliceParams := util.MakeSliceParams(parts)
+		return util.Slice(sliceType, sliceParams)
 	case ASTValueProjection:
 		left, err := intr.Execute(node.children[0], value)
 		if err != nil {
@@ -473,7 +475,7 @@ func (intr *treeInterpreter) flattenWithReflection(value interface{}) (interface
 func (intr *treeInterpreter) sliceWithReflection(node ASTNode, value interface{}) (interface{}, error) {
 	v := reflect.ValueOf(value)
 	parts := node.value.([]*int)
-	sliceParams := make([]sliceParam, 3)
+	sliceParams := make([]util.SliceParam, 3)
 	for i, part := range parts {
 		if part != nil {
 			sliceParams[i].Specified = true
@@ -485,7 +487,7 @@ func (intr *treeInterpreter) sliceWithReflection(node ASTNode, value interface{}
 		element := v.Index(i).Interface()
 		final = append(final, element)
 	}
-	return slice(final, sliceParams)
+	return util.Slice(final, sliceParams)
 }
 
 func (intr *treeInterpreter) filterProjectionWithReflection(node ASTNode, value interface{}) (interface{}, error) {
@@ -498,7 +500,7 @@ func (intr *treeInterpreter) filterProjectionWithReflection(node ASTNode, value 
 		if err != nil {
 			return nil, err
 		}
-		if !isFalse(result) {
+		if !util.IsFalse(result) {
 			current, err := intr.Execute(node.children[1], element)
 			if err != nil {
 				return nil, err
