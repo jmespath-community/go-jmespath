@@ -1,4 +1,4 @@
-package jmespath
+package parsing
 
 import (
 	"fmt"

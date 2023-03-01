@@ -1,17 +1,21 @@
 package jmespath
 
-import "strconv"
+import (
+	"strconv"
+
+	"github.com/jmespath-community/go-jmespath/pkg/parsing"
+)
 
 // JMESPath is the representation of a compiled JMES path query. A JMESPath is
 // safe for concurrent use by multiple goroutines.
 type JMESPath struct {
-	ast ASTNode
+	ast parsing.ASTNode
 }
 
 // Compile parses a JMESPath expression and returns, if successful, a JMESPath
 // object that can be used to match against data.
 func Compile(expression string) (*JMESPath, error) {
-	parser := NewParser()
+	parser := parsing.NewParser()
 	ast, err := parser.Parse(expression)
 	if err != nil {
 		return nil, err

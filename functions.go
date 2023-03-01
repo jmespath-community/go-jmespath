@@ -13,6 +13,7 @@ import (
 	"unicode/utf8"
 
 	jperror "github.com/jmespath-community/go-jmespath/pkg/error"
+	"github.com/jmespath-community/go-jmespath/pkg/parsing"
 	"github.com/jmespath-community/go-jmespath/pkg/util"
 )
 
@@ -47,7 +48,7 @@ type argSpec struct {
 
 type byExprString struct {
 	intr     *treeInterpreter
-	node     ASTNode
+	node     parsing.ASTNode
 	items    []interface{}
 	hasError bool
 }
@@ -86,7 +87,7 @@ func (a *byExprString) Less(i, j int) bool {
 
 type byExprFloat struct {
 	intr     *treeInterpreter
-	node     ASTNode
+	node     parsing.ASTNode
 	items    []interface{}
 	hasError bool
 }

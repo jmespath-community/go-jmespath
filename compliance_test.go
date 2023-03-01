@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/jmespath-community/go-jmespath/pkg/parsing"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -107,7 +108,7 @@ func runSyntaxTestCase(assert *assert.Assertions, given interface{}, testcase Te
 }
 
 func runTestCase(assert *assert.Assertions, given interface{}, testcase TestCase, filename string) {
-	lexer := NewLexer()
+	lexer := parsing.NewLexer()
 	var err error
 	_, err = lexer.tokenize(testcase.Expression)
 	if err != nil {
@@ -115,7 +116,7 @@ func runTestCase(assert *assert.Assertions, given interface{}, testcase TestCase
 		assert.Fail(errMsg)
 		return
 	}
-	parser := NewParser()
+	parser := parsing.NewParser()
 	_, err = parser.Parse(testcase.Expression)
 	if err != nil {
 		errMsg := fmt.Sprintf("(%s) Could not parse expression: %s -- %s", filename, testcase.Expression, err.Error())

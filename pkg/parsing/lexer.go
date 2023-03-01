@@ -1,4 +1,4 @@
-package jmespath
+package parsing
 
 import (
 	"bytes"
@@ -10,13 +10,13 @@ import (
 )
 
 type token struct {
-	tokenType tokType
+	tokenType TokType
 	value     string
 	position  int
 	length    int
 }
 
-type tokType int
+type TokType int
 
 const eof = -1
 
@@ -48,9 +48,9 @@ func (e SyntaxError) HighlightLocation() string {
 	return e.Expression + "\n" + strings.Repeat(" ", e.Offset) + "^"
 }
 
-//go:generate stringer -type=tokType
+//go:generate stringer -type=TokType
 const (
-	tUnknown tokType = iota
+	tUnknown TokType = iota
 	tStar
 	tDot
 	tFilter
@@ -90,7 +90,7 @@ const (
 	tEOF
 )
 
-var basicTokens = map[rune]tokType{
+var basicTokens = map[rune]TokType{
 	'.':      tDot,
 	'*':      tStar,
 	',':      tComma,
@@ -341,7 +341,7 @@ func (lexer *Lexer) syntaxError(msg string) SyntaxError {
 // Checks for a two char token, otherwise matches a single character
 // token. This is used whenever a two char token overlaps a single
 // char token, e.g. "||" -> tPipe, "|" -> tOr.
-func (lexer *Lexer) matchOrElse(first rune, second rune, matchedType tokType, singleCharType tokType) token {
+func (lexer *Lexer) matchOrElse(first rune, second rune, matchedType TokType, singleCharType TokType) token {
 	start := lexer.currentPos - lexer.lastWidth
 	nextRune := lexer.next()
 	var t token
