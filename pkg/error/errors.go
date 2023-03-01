@@ -1,21 +1,21 @@
-package jmespath
+package error
 
 import (
 	"errors"
 	"fmt"
 )
 
-func notAnInteger(name string, arg string) error {
+func NotAnInteger(name string, arg string) error {
 	return errors.New(formatNotAnInteger(name, arg))
 }
-func notAPositiveInteger(name string, arg string) error {
+func NotAPositiveInteger(name string, arg string) error {
 	return errors.New(formatNotAPositiveInteger(name, arg))
 }
-func notEnoughArgumentsSupplied(name string, count int, minExpected int, variadic bool) error {
+func NotEnoughArgumentsSupplied(name string, count int, minExpected int, variadic bool) error {
 	return errors.New(formatNotEnoughArguments(name, count, minExpected, variadic))
 }
 
-func tooManyArgumentsSupplied(name string, count int, maxExpected int) error {
+func TooManyArgumentsSupplied(name string, count int, maxExpected int) error {
 	return errors.New(formatTooManyArguments(name, count, maxExpected))
 }
 
