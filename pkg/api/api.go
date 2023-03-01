@@ -47,9 +47,9 @@ func (jp jmesPath) Search(data interface{}) (interface{}, error) {
 
 // Search evaluates a JMESPath expression against input data and returns the result.
 func Search(expression string, data interface{}) (interface{}, error) {
-	if compiled, err := Compile(expression); err != nil {
+	compiled, err := Compile(expression)
+	if err != nil {
 		return nil, err
-	} else {
-		return compiled.Search(data)
 	}
+	return compiled.Search(data)
 }
