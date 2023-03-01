@@ -1,4 +1,4 @@
-package jmespath
+package interpreter
 
 import (
 	"testing"
