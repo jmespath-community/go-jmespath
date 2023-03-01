@@ -9,26 +9,29 @@ import (
 
 // JMESPath is the representation of a compiled JMES path query. A JMESPath is
 // safe for concurrent use by multiple goroutines.
-type JMESPath struct {
+type JMESPath interface {
+	Search(interface{}) (interface{}, error)
+}
+
+type jmesPath struct {
 	ast parsing.ASTNode
 }
 
 // Compile parses a JMESPath expression and returns, if successful, a JMESPath
 // object that can be used to match against data.
-func Compile(expression string) (*JMESPath, error) {
+func Compile(expression string) (JMESPath, error) {
 	parser := parsing.NewParser()
 	ast, err := parser.Parse(expression)
 	if err != nil {
 		return nil, err
 	}
-	jmespath := &JMESPath{ast: ast}
-	return jmespath, nil
+	return jmesPath{ast: ast}, nil
 }
 
 // MustCompile is like Compile but panics if the expression cannot be parsed.
 // It simplifies safe initialization of global variables holding compiled
 // JMESPaths.
-func MustCompile(expression string) *JMESPath {
+func MustCompile(expression string) JMESPath {
 	jmespath, err := Compile(expression)
 	if err != nil {
 		panic(`jmespath: Compile(` + strconv.Quote(expression) + `): ` + err.Error())
@@ -37,7 +40,7 @@ func MustCompile(expression string) *JMESPath {
 }
 
 // Search evaluates a JMESPath expression against input data and returns the result.
-func (jp *JMESPath) Search(data interface{}) (interface{}, error) {
+func (jp jmesPath) Search(data interface{}) (interface{}, error) {
 	intr := interpreter.NewInterpreter(data)
 	return intr.Execute(jp.ast, data)
 }
