@@ -23,7 +23,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/jmespath-community/go-jmespath"
+	"github.com/jmespath-community/go-jmespath/pkg/api"
 	"github.com/jmespath-community/go-jmespath/pkg/parsing"
 )
 
@@ -79,7 +79,7 @@ func run() int {
 	if err := json.Unmarshal(inputData, &data); err != nil {
 		return errMsg("Invalid input JSON: %s", err)
 	}
-	result, err := jmespath.Search(expression, data)
+	result, err := api.Search(expression, data)
 	if err != nil {
 		return errMsg("Error executing expression: %s", err)
 	}
