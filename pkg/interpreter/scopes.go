@@ -1,4 +1,4 @@
-package jmespath
+package interpreter
 
 type scopes struct {
 	stack []map[string]interface{} // The stack of scope JSON objects.

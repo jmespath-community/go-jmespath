@@ -1,4 +1,4 @@
-package jmespath
+package interpreter
 
 import (
 	"errors"
@@ -20,7 +20,7 @@ type treeInterpreter struct {
 	scopes *scopes
 }
 
-func newInterpreter(data interface{}) *treeInterpreter {
+func NewInterpreter(data interface{}) *treeInterpreter {
 	interpreter := treeInterpreter{
 		scopes: newScopes(),
 	}
