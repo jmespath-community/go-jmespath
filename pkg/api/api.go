@@ -28,20 +28,23 @@ func newJMESPath(node parsing.ASTNode, funcs ...functions.FunctionEntry) JMESPat
 
 // Compile parses a JMESPath expression and returns, if successful, a JMESPath
 // object that can be used to match against data.
-func Compile(expression string) (JMESPath, error) {
+func Compile(expression string, funcs ...functions.FunctionEntry) (JMESPath, error) {
 	parser := parsing.NewParser()
 	ast, err := parser.Parse(expression)
 	if err != nil {
 		return nil, err
 	}
-	return newJMESPath(ast, functions.GetDefaultFunctions()...), nil
+	var f []functions.FunctionEntry
+	f = append(f, functions.GetDefaultFunctions()...)
+	f = append(f, funcs...)
+	return newJMESPath(ast, f...), nil
 }
 
 // MustCompile is like Compile but panics if the expression cannot be parsed.
 // It simplifies safe initialization of global variables holding compiled
 // JMESPaths.
-func MustCompile(expression string) JMESPath {
-	jmespath, err := Compile(expression)
+func MustCompile(expression string, funcs ...functions.FunctionEntry) JMESPath {
+	jmespath, err := Compile(expression, funcs...)
 	if err != nil {
 		panic(`jmespath: Compile(` + strconv.Quote(expression) + `): ` + err.Error())
 	}
@@ -55,8 +58,8 @@ func (jp jmesPath) Search(data interface{}) (interface{}, error) {
 }
 
 // Search evaluates a JMESPath expression against input data and returns the result.
-func Search(expression string, data interface{}) (interface{}, error) {
-	compiled, err := Compile(expression)
+func Search(expression string, data interface{}, funcs ...functions.FunctionEntry) (interface{}, error) {
+	compiled, err := Compile(expression, funcs...)
 	if err != nil {
 		return nil, err
 	}

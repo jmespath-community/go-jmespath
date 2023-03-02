@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/jmespath-community/go-jmespath/pkg/functions"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -43,10 +44,15 @@ func TestInvalidMustCompilePanics(t *testing.T) {
 	MustCompile("not a valid expression")
 }
 
+func jpfEcho(_ functions.ExecuteFunc, arguments []interface{}) (interface{}, error) {
+	return arguments[0], nil
+}
+
 func TestSearch(t *testing.T) {
 	type args struct {
 		expression string
 		data       interface{}
+		funcs      []functions.FunctionEntry
 	}
 	tests := []struct {
 		name    string
@@ -63,19 +69,62 @@ func TestSearch(t *testing.T) {
 			expression: "let({root: @}, &root).root",
 			data:       map[string]interface{}{},
 		},
-		wantErr: false,
 	}, {
 		args: args{
 			expression: "sort_by(@, &@ *`-1.0`)",
 			data:       []interface{}{1.0, 2.0, 3.0, 4.0, 5.0},
 		},
-		want:    []interface{}{5.0, 4.0, 3.0, 2.0, 1.0},
-		wantErr: false,
+		want: []interface{}{5.0, 4.0, 3.0, 2.0, 1.0},
+	}, {
+		args: args{
+			expression: "echo(@)",
+			data:       []interface{}{1.0, 2.0, 3.0, 4.0, 5.0},
+			funcs: []functions.FunctionEntry{{
+				Name:    "echo",
+				Handler: jpfEcho,
+				Arguments: []functions.ArgSpec{
+					{Types: []functions.JpType{functions.JpAny}},
+				},
+			}},
+		},
+		want: []interface{}{1.0, 2.0, 3.0, 4.0, 5.0},
+	}, {
+		args: args{
+			expression: "echo(@)",
+			data:       "abc",
+			funcs: []functions.FunctionEntry{{
+				Name:    "echo",
+				Handler: jpfEcho,
+				Arguments: []functions.ArgSpec{
+					{Types: []functions.JpType{functions.JpAny}},
+				},
+			}},
+		},
+		want: "abc",
+	}, {
+		args: args{
+			expression: "echo(@)",
+			data:       42.0,
+			funcs: []functions.FunctionEntry{{
+				Name:    "echo",
+				Handler: jpfEcho,
+				Arguments: []functions.ArgSpec{
+					{Types: []functions.JpType{functions.JpAny}},
+				},
+			}},
+		},
+		want: 42.0,
+	}, {
+		args: args{
+			expression: "echo(@)",
+			data:       42.0,
+		},
+		wantErr: true,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			assert := assert.New(t)
-			got, err := Search(tt.args.expression, tt.args.data)
+			got, err := Search(tt.args.expression, tt.args.data, tt.args.funcs...)
 			assert.Equal(tt.wantErr, err != nil)
 			assert.Equal(tt.want, got)
 		})
