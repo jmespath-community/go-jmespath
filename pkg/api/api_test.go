@@ -114,6 +114,12 @@ func TestSearch(t *testing.T) {
 			}},
 		},
 		want: 42.0,
+	}, {
+		args: args{
+			expression: "echo(@)",
+			data:       42.0,
+		},
+		wantErr: true,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
