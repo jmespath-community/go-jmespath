@@ -7,6 +7,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/jmespath-community/go-jmespath/pkg/functions"
 	"github.com/jmespath-community/go-jmespath/pkg/parsing"
 	"github.com/jmespath-community/go-jmespath/pkg/util"
 )
@@ -26,16 +27,11 @@ type treeInterpreter struct {
 	scope Scope
 }
 
-func NewInterpreter(data interface{}) Interpreter {
+func NewInterpreter(data interface{}, funcs ...functions.FunctionEntry) Interpreter {
 	return &treeInterpreter{
-		fCall: newFunctionCaller(),
+		fCall: newFunctionCaller(funcs...),
 		scope: newScope(map[string]interface{}{"$": data}),
 	}
-}
-
-type expRef struct {
-	ref     parsing.ASTNode
-	context interface{}
 }
 
 func (intr *treeInterpreter) WithScope(data map[string]interface{}) Interpreter {
@@ -132,7 +128,10 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 			return leftNum <= rightNum, nil
 		}
 	case parsing.ASTExpRef:
-		return expRef{ref: node.Children[0], context: value}, nil
+		return functions.ExpRef{
+			Node:    node.Children[0],
+			Context: value,
+		}, nil
 	case parsing.ASTFunctionExpression:
 		resolvedArgs := []interface{}{}
 		for _, arg := range node.Children {
@@ -142,7 +141,7 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 			}
 			resolvedArgs = append(resolvedArgs, current)
 		}
-		return intr.fCall.CallFunction(node.Value.(string), resolvedArgs, intr)
+		return intr.fCall.callFunction(node.Value.(string), resolvedArgs, intr)
 	case parsing.ASTField:
 		key := node.Value.(string)
 		var result interface{}
