@@ -120,6 +120,14 @@ func TestSearch(t *testing.T) {
 			data:       42.0,
 		},
 		wantErr: true,
+	}, {
+		args: args{
+			expression: `@."$".a`,
+			data: map[string]interface{}{
+				"a": 42.0,
+			},
+		},
+		want: nil,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

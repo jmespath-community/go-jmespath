@@ -25,12 +25,14 @@ type Interpreter interface {
 type treeInterpreter struct {
 	fCall *functionCaller
 	scope Scope
+	root  interface{}
 }
 
 func NewInterpreter(data interface{}, funcs ...functions.FunctionEntry) Interpreter {
 	return &treeInterpreter{
 		fCall: newFunctionCaller(funcs...),
-		scope: newScope(map[string]interface{}{"$": data}),
+		scope: newScope(nil),
+		root:  data,
 	}
 }
 
@@ -38,6 +40,7 @@ func (intr *treeInterpreter) WithScope(data map[string]interface{}) Interpreter 
 	return &treeInterpreter{
 		fCall: intr.fCall,
 		scope: intr.scope.With(data),
+		root:  intr.root,
 	}
 }
 
@@ -223,10 +226,7 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 	case parsing.ASTIdentity, parsing.ASTCurrentNode:
 		return value, nil
 	case parsing.ASTRootNode:
-		if result, ok := intr.scope.GetValue("$"); ok {
-			return result, nil
-		}
-		return nil, nil
+		return intr.root, nil
 	case parsing.ASTIndex:
 		if sliceType, ok := value.([]interface{}); ok {
 			index := node.Value.(int)
