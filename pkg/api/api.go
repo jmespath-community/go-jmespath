@@ -15,14 +15,14 @@ type JMESPath interface {
 }
 
 type jmesPath struct {
-	node  parsing.ASTNode
-	funcs []functions.FunctionEntry
+	node   parsing.ASTNode
+	caller interpreter.FunctionCaller
 }
 
 func newJMESPath(node parsing.ASTNode, funcs ...functions.FunctionEntry) JMESPath {
 	return jmesPath{
-		node:  node,
-		funcs: funcs,
+		node:   node,
+		caller: interpreter.NewFunctionCaller(funcs...),
 	}
 }
 
@@ -53,7 +53,7 @@ func MustCompile(expression string, funcs ...functions.FunctionEntry) JMESPath {
 
 // Search evaluates a JMESPath expression against input data and returns the result.
 func (jp jmesPath) Search(data interface{}) (interface{}, error) {
-	intr := interpreter.NewInterpreter(data, jp.funcs...)
+	intr := interpreter.NewInterpreter(data, jp.caller)
 	return intr.Execute(jp.node, data)
 }
 
