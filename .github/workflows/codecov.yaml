@@ -18,6 +18,6 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v3
       - name: Run coverage
-        run: go test ./... -race -coverprofile=coverage.out -covermode=atomic
+        run: go test ./... -cover -coverpkg ./... -race -coverprofile=coverage.out -covermode=atomic
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
