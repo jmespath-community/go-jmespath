@@ -10,6 +10,10 @@ import (
 	"github.com/jmespath-community/go-jmespath/pkg/util"
 )
 
+type FunctionCaller interface {
+	CallFunction(string, []interface{}, Interpreter) (interface{}, error)
+}
+
 type functionEntry struct {
 	arguments []functions.ArgSpec
 	handler   functions.JpFunction
@@ -19,7 +23,7 @@ type functionCaller struct {
 	functionTable map[string]functionEntry
 }
 
-func newFunctionCaller(funcs ...functions.FunctionEntry) *functionCaller {
+func NewFunctionCaller(funcs ...functions.FunctionEntry) *functionCaller {
 	fTable := map[string]functionEntry{}
 	for _, f := range funcs {
 		fTable[f.Name] = functionEntry{
@@ -143,7 +147,7 @@ func typeCheck(a functions.ArgSpec, arg interface{}) error {
 	return fmt.Errorf("invalid type for: %v, expected: %#v", arg, a.Types)
 }
 
-func (f *functionCaller) callFunction(name string, arguments []interface{}, intr Interpreter) (interface{}, error) {
+func (f *functionCaller) CallFunction(name string, arguments []interface{}, intr Interpreter) (interface{}, error) {
 	entry, ok := f.functionTable[name]
 	if !ok {
 		return nil, errors.New("unknown function: " + name)

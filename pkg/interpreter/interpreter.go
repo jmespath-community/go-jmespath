@@ -23,24 +23,24 @@ type Interpreter interface {
 }
 
 type treeInterpreter struct {
-	fCall *functionCaller
-	scope Scope
-	root  interface{}
+	caller FunctionCaller
+	scope  Scope
+	root   interface{}
 }
 
-func NewInterpreter(data interface{}, funcs ...functions.FunctionEntry) Interpreter {
+func NewInterpreter(data interface{}, caller FunctionCaller) Interpreter {
 	return &treeInterpreter{
-		fCall: newFunctionCaller(funcs...),
-		scope: newScope(nil),
-		root:  data,
+		caller: caller,
+		scope:  newScope(nil),
+		root:   data,
 	}
 }
 
 func (intr *treeInterpreter) WithScope(data map[string]interface{}) Interpreter {
 	return &treeInterpreter{
-		fCall: intr.fCall,
-		scope: intr.scope.With(data),
-		root:  intr.root,
+		caller: intr.caller,
+		scope:  intr.scope.With(data),
+		root:   intr.root,
 	}
 }
 
@@ -144,7 +144,7 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 			}
 			resolvedArgs = append(resolvedArgs, current)
 		}
-		return intr.fCall.callFunction(node.Value.(string), resolvedArgs, intr)
+		return intr.caller.CallFunction(node.Value.(string), resolvedArgs, intr)
 	case parsing.ASTField:
 		key := node.Value.(string)
 		var result interface{}
