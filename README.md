@@ -1,6 +1,7 @@
 # go-jmespath - A JMESPath implementation in Go
 
 [![GoDoc](https://godoc.org/github.com/jmespath-community/go-jmespath?status.svg)](https://godoc.org/github.com/jmespath-community/go-jmespath)
+[![codecov](https://codecov.io/gh/jmespath-community/go-jmespath/branch/main/graph/badge.svg)](https://app.codecov.io/gh/jmespath-community/go-jmespath/branch/main)
 
 go-jmespath is a GO implementation of JMESPath,
 which is a query language for JSON.  It will take a JSON
