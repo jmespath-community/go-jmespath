@@ -21,3 +21,7 @@ jobs:
         run: go test ./... -cover -coverpkg ./... -race -coverprofile=coverage.out -covermode=atomic
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage.out
+          fail_ci_if_error: true
+          verbose: true
