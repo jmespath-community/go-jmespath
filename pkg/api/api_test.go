@@ -44,7 +44,7 @@ func TestInvalidMustCompilePanics(t *testing.T) {
 	MustCompile("not a valid expression")
 }
 
-func jpfEcho(_ functions.ExecuteFunc, arguments []interface{}) (interface{}, error) {
+func jpfEcho(arguments []interface{}) (interface{}, error) {
 	return arguments[0], nil
 }
 
