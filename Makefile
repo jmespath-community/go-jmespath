@@ -8,7 +8,6 @@ help:
 	@echo "  build                   to build the library and jp executable"
 	@echo "  generate                to run codegen"
 
-
 generate:
 	go generate ./...
 
@@ -27,7 +26,7 @@ check:
 	golangci-lint run
 
 htmlc:
-	go test -coverprofile="/tmp/jpcov"  && go tool cover -html="/tmp/jpcov" && unlink /tmp/jpcov
+	go test -cover -coverpkg ./... -coverprofile="/tmp/jpcov" ./... && go tool cover -html="/tmp/jpcov" && unlink /tmp/jpcov
 
 buildfuzz:
 	go-fuzz-build github.com/jmespath-community/go-jmespath/fuzz
