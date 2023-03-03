@@ -18,7 +18,6 @@ var (
 // function types
 
 type (
-	ExecuteFunc   = functions.ExecuteFunc
 	JpFunction    = functions.JpFunction
 	JpType        = functions.JpType
 	FunctionEntry = functions.FunctionEntry

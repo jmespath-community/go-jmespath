@@ -7,7 +7,6 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/jmespath-community/go-jmespath/pkg/functions"
 	"github.com/jmespath-community/go-jmespath/pkg/parsing"
 	"github.com/jmespath-community/go-jmespath/pkg/util"
 )
@@ -131,9 +130,11 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 			return leftNum <= rightNum, nil
 		}
 	case parsing.ASTExpRef:
-		return functions.ExpRef{
-			Node:    node.Children[0],
-			Context: value,
+		return func(data interface{}, scope map[string]interface{}) (interface{}, error) {
+			if scope != nil {
+				return intr.WithScope(scope).Execute(node.Children[0], value)
+			}
+			return intr.Execute(node.Children[0], data)
 		}, nil
 	case parsing.ASTFunctionExpression:
 		resolvedArgs := []interface{}{}

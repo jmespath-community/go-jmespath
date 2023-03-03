@@ -6,7 +6,6 @@ import (
 
 	jperror "github.com/jmespath-community/go-jmespath/pkg/error"
 	"github.com/jmespath-community/go-jmespath/pkg/functions"
-	"github.com/jmespath-community/go-jmespath/pkg/parsing"
 	"github.com/jmespath-community/go-jmespath/pkg/util"
 )
 
@@ -156,12 +155,5 @@ func (f *functionCaller) CallFunction(name string, arguments []interface{}, intr
 	if err != nil {
 		return nil, err
 	}
-	exec := func(node parsing.ASTNode, data interface{}, scope map[string]interface{}) (interface{}, error) {
-		intr := intr
-		if scope != nil {
-			intr = intr.WithScope(scope)
-		}
-		return intr.Execute(node, data)
-	}
-	return entry.handler(exec, resolvedArgs)
+	return entry.handler(resolvedArgs)
 }
