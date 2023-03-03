@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/jmespath-community/go-jmespath/pkg/api"
 	"github.com/jmespath-community/go-jmespath/pkg/parsing"
 	"github.com/stretchr/testify/assert"
 )
@@ -17,6 +16,7 @@ type TestSuite struct {
 	TestCases []TestCase `json:"cases"`
 	Comment   string
 }
+
 type TestCase struct {
 	Comment    string
 	Expression string
@@ -104,7 +104,7 @@ func runSyntaxTestCase(assert *assert.Assertions, given interface{}, testcase Te
 	// Anything with an .Error means that we expect that JMESPath should return
 	// an error when we try to evaluate the expression.
 	// fmt.Println(fmt.Sprintf("%s: %s", filename, testcase.Expression))
-	_, err := api.Search(testcase.Expression, given)
+	_, err := Search(testcase.Expression, given)
 	assert.NotNil(err, fmt.Sprintf("Expression: %s", testcase.Expression))
 }
 
@@ -124,7 +124,7 @@ func runTestCase(assert *assert.Assertions, given interface{}, testcase TestCase
 		assert.Fail(errMsg)
 		return
 	}
-	actual, err := api.Search(testcase.Expression, given)
+	actual, err := Search(testcase.Expression, given)
 	if assert.Nil(err, fmt.Sprintf("Expression: %s", testcase.Expression)) {
 		assert.Equal(testcase.Result, actual, fmt.Sprintf("Expression: %s", testcase.Expression))
 	}
