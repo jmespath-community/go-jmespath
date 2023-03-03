@@ -51,7 +51,8 @@ func search(t *testing.T, expression string, data interface{}) (interface{}, err
 	if err != nil {
 		return nil, err
 	}
-	intr := NewInterpreter(nil, functions.GetDefaultFunctions()...)
+	caller := NewFunctionCaller(functions.GetDefaultFunctions()...)
+	intr := NewInterpreter(nil, caller)
 	return intr.Execute(ast, data)
 }
 
@@ -196,7 +197,8 @@ func TestCanSupportSliceOfStructsWithFunctions(t *testing.T) {
 
 func BenchmarkInterpretSingleFieldStruct(b *testing.B) {
 	assert := assert.New(b)
-	intr := NewInterpreter(nil, functions.GetDefaultFunctions()...)
+	caller := NewFunctionCaller(functions.GetDefaultFunctions()...)
+	intr := NewInterpreter(nil, caller)
 	parser := parsing.NewParser()
 	ast, _ := parser.Parse("fooasdfasdfasdfasdf")
 	data := benchmarkStruct{"foobarbazqux"}
@@ -210,7 +212,8 @@ func BenchmarkInterpretSingleFieldStruct(b *testing.B) {
 
 func BenchmarkInterpretNestedStruct(b *testing.B) {
 	assert := assert.New(b)
-	intr := NewInterpreter(nil, functions.GetDefaultFunctions()...)
+	caller := NewFunctionCaller(functions.GetDefaultFunctions()...)
+	intr := NewInterpreter(nil, caller)
 	parser := parsing.NewParser()
 	ast, _ := parser.Parse("fooasdfasdfasdfasdf.fooasdfasdfasdfasdf.fooasdfasdfasdfasdf.fooasdfasdfasdfasdf")
 	data := benchmarkNested{
@@ -234,8 +237,8 @@ func BenchmarkInterpretNestedMaps(b *testing.B) {
 	var data interface{}
 	err := json.Unmarshal(jsonData, &data)
 	assert.Nil(err)
-
-	intr := NewInterpreter(nil, functions.GetDefaultFunctions()...)
+	caller := NewFunctionCaller(functions.GetDefaultFunctions()...)
+	intr := NewInterpreter(nil, caller)
 	parser := parsing.NewParser()
 	ast, _ := parser.Parse("fooasdfasdfasdfasdf.fooasdfasdfasdfasdf.fooasdfasdfasdfasdf.fooasdfasdfasdfasdf")
 	for i := 0; i < b.N; i++ {
