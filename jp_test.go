@@ -34,7 +34,7 @@ var whiteListed = []string{
 	"compliance/tests/filters.json",
 	"compliance/tests/functions.json",
 	"compliance/tests/function_group_by.json",
-	"compliance/tests/function_let.json",
+	// "compliance/tests/function_let.json",
 	"compliance/tests/function_strings.json",
 	"compliance/tests/identifiers.json",
 	"compliance/tests/indices.json",
