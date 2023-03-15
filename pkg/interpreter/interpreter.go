@@ -18,28 +18,17 @@ This is a tree based interpreter.  It walks the AST and directly
 */
 type Interpreter interface {
 	Execute(parsing.ASTNode, interface{}) (interface{}, error)
-	WithScope(map[string]interface{}) Interpreter
 }
 
 type treeInterpreter struct {
 	caller FunctionCaller
-	scope  Scope
 	root   interface{}
 }
 
 func NewInterpreter(data interface{}, caller FunctionCaller) Interpreter {
 	return &treeInterpreter{
 		caller: caller,
-		scope:  newScope(nil),
 		root:   data,
-	}
-}
-
-func (intr *treeInterpreter) WithScope(data map[string]interface{}) Interpreter {
-	return &treeInterpreter{
-		caller: intr.caller,
-		scope:  intr.scope.With(data),
-		root:   intr.root,
 	}
 }
 
@@ -130,10 +119,7 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 			return leftNum <= rightNum, nil
 		}
 	case parsing.ASTExpRef:
-		return func(data interface{}, scope map[string]interface{}) (interface{}, error) {
-			if scope != nil {
-				return intr.WithScope(scope).Execute(node.Children[0], value)
-			}
+		return func(data interface{}) (interface{}, error) {
 			return intr.Execute(node.Children[0], data)
 		}, nil
 	case parsing.ASTFunctionExpression:
@@ -145,7 +131,7 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 			}
 			resolvedArgs = append(resolvedArgs, current)
 		}
-		return intr.caller.CallFunction(node.Value.(string), resolvedArgs, intr)
+		return intr.caller.CallFunction(node.Value.(string), resolvedArgs)
 	case parsing.ASTField:
 		key := node.Value.(string)
 		var result interface{}
@@ -157,9 +143,6 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 		}
 		result = intr.fieldFromStruct(node.Value.(string), value)
 		if result != nil {
-			return result, nil
-		}
-		if result, ok := intr.scope.GetValue(key); ok {
 			return result, nil
 		}
 		return nil, nil

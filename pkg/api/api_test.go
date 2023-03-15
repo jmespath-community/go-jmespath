@@ -66,11 +66,6 @@ func TestSearch(t *testing.T) {
 		wantErr: true,
 	}, {
 		args: args{
-			expression: "let({root: @}, &root).root",
-			data:       map[string]interface{}{},
-		},
-	}, {
-		args: args{
 			expression: "sort_by(@, &@ *`-1.0`)",
 			data:       []interface{}{1.0, 2.0, 3.0, 4.0, 5.0},
 		},

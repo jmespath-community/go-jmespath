@@ -18,7 +18,7 @@ import (
 
 type (
 	JpFunction = func([]interface{}) (interface{}, error)
-	ExpRef     = func(interface{}, map[string]interface{}) (interface{}, error)
+	ExpRef     = func(interface{}) (interface{}, error)
 	JpType     string
 )
 
@@ -230,7 +230,7 @@ func jpfGroupBy(arguments []interface{}) (interface{}, error) {
 	}
 	groups := map[string]interface{}{}
 	for _, element := range arr {
-		spec, err := exp(element, nil)
+		spec, err := exp(element)
 		if err != nil {
 			return nil, err
 		}
@@ -294,22 +294,12 @@ func jpfLower(arguments []interface{}) (interface{}, error) {
 	return strings.ToLower(arguments[0].(string)), nil
 }
 
-func jpfLet(arguments []interface{}) (interface{}, error) {
-	scope := arguments[0].(map[string]interface{})
-	exp := arguments[1].(ExpRef)
-	result, err := exp(nil, scope)
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
-}
-
 func jpfMap(arguments []interface{}) (interface{}, error) {
 	exp := arguments[0].(ExpRef)
 	arr := arguments[1].([]interface{})
 	mapped := make([]interface{}, 0, len(arr))
 	for _, value := range arr {
-		current, err := exp(value, nil)
+		current, err := exp(value)
 		if err != nil {
 			return nil, err
 		}
@@ -359,7 +349,7 @@ func jpfMaxBy(arguments []interface{}) (interface{}, error) {
 	} else if len(arr) == 1 {
 		return arr[0], nil
 	}
-	start, err := exp(arr[0], nil)
+	start, err := exp(arr[0])
 	if err != nil {
 		return nil, err
 	}
@@ -368,7 +358,7 @@ func jpfMaxBy(arguments []interface{}) (interface{}, error) {
 		bestVal := t
 		bestItem := arr[0]
 		for _, item := range arr[1:] {
-			result, err := exp(item, nil)
+			result, err := exp(item)
 			if err != nil {
 				return nil, err
 			}
@@ -386,7 +376,7 @@ func jpfMaxBy(arguments []interface{}) (interface{}, error) {
 		bestVal := t
 		bestItem := arr[0]
 		for _, item := range arr[1:] {
-			result, err := exp(item, nil)
+			result, err := exp(item)
 			if err != nil {
 				return nil, err
 			}
@@ -456,7 +446,7 @@ func jpfMinBy(arguments []interface{}) (interface{}, error) {
 	} else if len(arr) == 1 {
 		return arr[0], nil
 	}
-	start, err := exp(arr[0], nil)
+	start, err := exp(arr[0])
 	if err != nil {
 		return nil, err
 	}
@@ -464,7 +454,7 @@ func jpfMinBy(arguments []interface{}) (interface{}, error) {
 		bestVal := t
 		bestItem := arr[0]
 		for _, item := range arr[1:] {
-			result, err := exp(item, nil)
+			result, err := exp(item)
 			if err != nil {
 				return nil, err
 			}
@@ -482,7 +472,7 @@ func jpfMinBy(arguments []interface{}) (interface{}, error) {
 		bestVal := t
 		bestItem := arr[0]
 		for _, item := range arr[1:] {
-			result, err := exp(item, nil)
+			result, err := exp(item)
 			if err != nil {
 				return nil, err
 			}
@@ -617,7 +607,7 @@ func jpfSortBy(arguments []interface{}) (interface{}, error) {
 	}
 	var sortKeys []interface{}
 	for _, item := range arr {
-		if value, err := exp(item, nil); err != nil {
+		if value, err := exp(item); err != nil {
 			return nil, err
 		} else {
 			sortKeys = append(sortKeys, value)
