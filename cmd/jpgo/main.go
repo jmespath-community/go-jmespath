@@ -78,7 +78,7 @@ func run() int {
 	if err := json.Unmarshal(inputData, &data); err != nil {
 		return errMsg("Invalid input JSON: %s", err)
 	}
-	result, err := api.Search(expression, data)
+	result, err := api.Search(expression, data, nil)
 	if err != nil {
 		return errMsg("Error executing expression: %s", err)
 	}

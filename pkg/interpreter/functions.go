@@ -10,7 +10,7 @@ import (
 )
 
 type FunctionCaller interface {
-	CallFunction(string, []interface{}, interface{}) (interface{}, error)
+	CallFunction(string, []interface{}) (interface{}, error)
 }
 
 type functionEntry struct {
@@ -146,7 +146,7 @@ func typeCheck(a functions.ArgSpec, arg interface{}) error {
 	return fmt.Errorf("invalid type for: %v, expected: %#v", arg, a.Types)
 }
 
-func (f *functionCaller) CallFunction(name string, arguments []interface{}, context interface{}) (interface{}, error) {
+func (f *functionCaller) CallFunction(name string, arguments []interface{}) (interface{}, error) {
 	entry, ok := f.functionTable[name]
 	if !ok {
 		return nil, errors.New("unknown function: " + name)
@@ -155,5 +155,5 @@ func (f *functionCaller) CallFunction(name string, arguments []interface{}, cont
 	if err != nil {
 		return nil, err
 	}
-	return entry.handler(resolvedArgs, context)
+	return entry.handler(resolvedArgs)
 }

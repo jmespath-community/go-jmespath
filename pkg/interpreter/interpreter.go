@@ -32,6 +32,25 @@ func NewInterpreter(data interface{}, caller FunctionCaller) Interpreter {
 	}
 }
 
+type expRef struct {
+	node    parsing.ASTNode
+	data    interface{}
+	context interface{}
+	intr    Interpreter
+}
+
+func (r expRef) Context() interface{} {
+	return r.context
+}
+
+func (r expRef) Data() interface{} {
+	return r.data
+}
+
+func (r expRef) Execute(data interface{}, context interface{}) (interface{}, error) {
+	return r.intr.Execute(r.node, data, context)
+}
+
 // Execute takes an ASTNode and input data and interprets the AST directly.
 // It will produce the result of applying the JMESPath expression associated
 // with the ASTNode to the input data "value".
@@ -119,8 +138,11 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}, co
 			return leftNum <= rightNum, nil
 		}
 	case parsing.ASTExpRef:
-		return func(data interface{}) (interface{}, error) {
-			return intr.Execute(node.Children[0], data, context)
+		return expRef{
+			node:    node.Children[0],
+			data:    value,
+			context: context,
+			intr:    intr,
 		}, nil
 	case parsing.ASTFunctionExpression:
 		resolvedArgs := []interface{}{}
@@ -131,7 +153,7 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}, co
 			}
 			resolvedArgs = append(resolvedArgs, current)
 		}
-		return intr.caller.CallFunction(node.Value.(string), resolvedArgs, context)
+		return intr.caller.CallFunction(node.Value.(string), resolvedArgs)
 	case parsing.ASTField:
 		key := node.Value.(string)
 		var result interface{}

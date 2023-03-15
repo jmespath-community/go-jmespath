@@ -14,7 +14,7 @@ func TestValidUncompiledExpressionSearches(t *testing.T) {
 	var d interface{}
 	err := json.Unmarshal(j, &d)
 	assert.Nil(err)
-	result, err := Search("foo.bar.baz[2]", d)
+	result, err := Search("foo.bar.baz[2]", d, nil)
 	assert.Nil(err)
 	assert.Equal(2.0, result)
 }
@@ -25,7 +25,7 @@ func TestValidPrecompiledExpressionSearches(t *testing.T) {
 	data["foo"] = "bar"
 	precompiled, err := Compile("foo")
 	assert.Nil(err)
-	result, err := precompiled.Search(data)
+	result, err := precompiled.Search(data, nil)
 	assert.Nil(err)
 	assert.Equal("bar", result)
 }
@@ -44,7 +44,7 @@ func TestInvalidMustCompilePanics(t *testing.T) {
 	MustCompile("not a valid expression")
 }
 
-func jpfEcho(arguments []interface{}, _ interface{}) (interface{}, error) {
+func jpfEcho(arguments []interface{}) (interface{}, error) {
 	return arguments[0], nil
 }
 
@@ -52,6 +52,7 @@ func TestSearch(t *testing.T) {
 	type args struct {
 		expression string
 		data       interface{}
+		context    interface{}
 		funcs      []functions.FunctionEntry
 	}
 	tests := []struct {
@@ -123,11 +124,22 @@ func TestSearch(t *testing.T) {
 			},
 		},
 		want: nil,
+	}, {
+		args: args{
+			expression: `use_context(&@.a)`,
+			data: map[string]interface{}{
+				"a": 64.0,
+			},
+			context: map[string]interface{}{
+				"a": 42.0,
+			},
+		},
+		want: 42.0,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			assert := assert.New(t)
-			got, err := Search(tt.args.expression, tt.args.data, tt.args.funcs...)
+			got, err := Search(tt.args.expression, tt.args.data, tt.args.context, tt.args.funcs...)
 			assert.Equal(tt.wantErr, err != nil)
 			assert.Equal(tt.want, got)
 		})

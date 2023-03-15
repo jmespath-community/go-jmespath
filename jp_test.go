@@ -104,7 +104,7 @@ func runSyntaxTestCase(assert *assert.Assertions, given interface{}, testcase Te
 	// Anything with an .Error means that we expect that JMESPath should return
 	// an error when we try to evaluate the expression.
 	// fmt.Println(fmt.Sprintf("%s: %s", filename, testcase.Expression))
-	_, err := Search(testcase.Expression, given)
+	_, err := Search(testcase.Expression, given, nil)
 	assert.NotNil(err, fmt.Sprintf("Expression: %s", testcase.Expression))
 }
 
@@ -124,7 +124,7 @@ func runTestCase(assert *assert.Assertions, given interface{}, testcase TestCase
 		assert.Fail(errMsg)
 		return
 	}
-	actual, err := Search(testcase.Expression, given)
+	actual, err := Search(testcase.Expression, given, nil)
 	if assert.Nil(err, fmt.Sprintf("Expression: %s", testcase.Expression)) {
 		assert.Equal(testcase.Result, actual, fmt.Sprintf("Expression: %s", testcase.Expression))
 	}

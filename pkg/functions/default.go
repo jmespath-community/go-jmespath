@@ -275,5 +275,20 @@ func GetDefaultFunctions() []FunctionEntry {
 			{Types: []JpType{JpArray}, Variadic: true},
 		},
 		Handler: jpfZip,
+	}, {
+		// experimental context function
+		Name: "with_context",
+		Arguments: []ArgSpec{
+			{Types: []JpType{JpAny}},
+			{Types: []JpType{JpExpref}},
+		},
+		Handler: jpfWithContext,
+	}, {
+		// experimental context function
+		Name: "use_context",
+		Arguments: []ArgSpec{
+			{Types: []JpType{JpExpref}},
+		},
+		Handler: jpfUseContext,
 	}}
 }

@@ -11,7 +11,7 @@ import (
 // JMESPath is the representation of a compiled JMES path query. A JMESPath is
 // safe for concurrent use by multiple goroutines.
 type JMESPath interface {
-	Search(interface{}) (interface{}, error)
+	Search(interface{}, interface{}) (interface{}, error)
 }
 
 type jmesPath struct {
@@ -52,16 +52,16 @@ func MustCompile(expression string, funcs ...functions.FunctionEntry) JMESPath {
 }
 
 // Search evaluates a JMESPath expression against input data and returns the result.
-func (jp jmesPath) Search(data interface{}) (interface{}, error) {
+func (jp jmesPath) Search(data interface{}, context interface{}) (interface{}, error) {
 	intr := interpreter.NewInterpreter(data, jp.caller)
-	return intr.Execute(jp.node, data, nil)
+	return intr.Execute(jp.node, data, context)
 }
 
 // Search evaluates a JMESPath expression against input data and returns the result.
-func Search(expression string, data interface{}, funcs ...functions.FunctionEntry) (interface{}, error) {
+func Search(expression string, data interface{}, context interface{}, funcs ...functions.FunctionEntry) (interface{}, error) {
 	compiled, err := Compile(expression, funcs...)
 	if err != nil {
 		return nil, err
 	}
-	return compiled.Search(data)
+	return compiled.Search(data, context)
 }
