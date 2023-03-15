@@ -3,6 +3,7 @@ package jmespath
 import (
 	"github.com/jmespath-community/go-jmespath/pkg/api"
 	"github.com/jmespath-community/go-jmespath/pkg/functions"
+	"github.com/jmespath-community/go-jmespath/pkg/parsing"
 )
 
 // api types
@@ -14,6 +15,12 @@ var (
 	MustCompile = api.MustCompile
 	Search      = api.Search
 )
+
+// parsing types
+
+type SyntaxError = parsing.SyntaxError
+
+var NewParser = parsing.NewParser
 
 // function types
 
