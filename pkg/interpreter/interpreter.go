@@ -18,30 +18,30 @@ This is a tree based interpreter.  It walks the AST and directly
 */
 type Interpreter interface {
 	Execute(parsing.ASTNode, interface{}) (interface{}, error)
-	WithScope(map[string]interface{}) Interpreter
+	// WithScope(map[string]interface{}) Interpreter
 }
 
 type treeInterpreter struct {
 	caller FunctionCaller
-	scope  Scope
-	root   interface{}
+	// scope  Scope
+	root interface{}
 }
 
 func NewInterpreter(data interface{}, caller FunctionCaller) Interpreter {
 	return &treeInterpreter{
 		caller: caller,
-		scope:  newScope(nil),
-		root:   data,
+		// scope:  newScope(nil),
+		root: data,
 	}
 }
 
-func (intr *treeInterpreter) WithScope(data map[string]interface{}) Interpreter {
-	return &treeInterpreter{
-		caller: intr.caller,
-		scope:  intr.scope.With(data),
-		root:   intr.root,
-	}
-}
+// func (intr *treeInterpreter) WithScope(data map[string]interface{}) Interpreter {
+// 	return &treeInterpreter{
+// 		caller: intr.caller,
+// 		scope:  intr.scope.With(data),
+// 		root:   intr.root,
+// 	}
+// }
 
 // Execute takes an ASTNode and input data and interprets the AST directly.
 // It will produce the result of applying the JMESPath expression associated
@@ -130,10 +130,10 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 			return leftNum <= rightNum, nil
 		}
 	case parsing.ASTExpRef:
-		return func(data interface{}, scope map[string]interface{}) (interface{}, error) {
-			if scope != nil {
-				return intr.WithScope(scope).Execute(node.Children[0], value)
-			}
+		return func(data interface{} /*, scope map[string]interface{}*/) (interface{}, error) {
+			// if scope != nil {
+			// 	return intr.WithScope(scope).Execute(node.Children[0], value)
+			// }
 			return intr.Execute(node.Children[0], data)
 		}, nil
 	case parsing.ASTFunctionExpression:
@@ -159,9 +159,9 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 		if result != nil {
 			return result, nil
 		}
-		if result, ok := intr.scope.GetValue(key); ok {
-			return result, nil
-		}
+		// if result, ok := intr.scope.GetValue(key); ok {
+		// 	return result, nil
+		// }
 		return nil, nil
 	case parsing.ASTFilterProjection:
 		left, err := intr.Execute(node.Children[0], value)
