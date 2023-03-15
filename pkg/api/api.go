@@ -54,7 +54,7 @@ func MustCompile(expression string, funcs ...functions.FunctionEntry) JMESPath {
 // Search evaluates a JMESPath expression against input data and returns the result.
 func (jp jmesPath) Search(data interface{}) (interface{}, error) {
 	intr := interpreter.NewInterpreter(data, jp.caller)
-	return intr.Execute(jp.node, data)
+	return intr.Execute(jp.node, data, nil)
 }
 
 // Search evaluates a JMESPath expression against input data and returns the result.

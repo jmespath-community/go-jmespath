@@ -17,7 +17,7 @@ This is a tree based interpreter.  It walks the AST and directly
 	interprets the AST to search through a JSON document.
 */
 type Interpreter interface {
-	Execute(parsing.ASTNode, interface{}) (interface{}, error)
+	Execute(parsing.ASTNode, interface{}, interface{}) (interface{}, error)
 }
 
 type treeInterpreter struct {
@@ -35,10 +35,10 @@ func NewInterpreter(data interface{}, caller FunctionCaller) Interpreter {
 // Execute takes an ASTNode and input data and interprets the AST directly.
 // It will produce the result of applying the JMESPath expression associated
 // with the ASTNode to the input data "value".
-func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (interface{}, error) {
+func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}, context interface{}) (interface{}, error) {
 	switch node.NodeType {
 	case parsing.ASTArithmeticUnaryExpression:
-		expr, err := intr.Execute(node.Children[0], value)
+		expr, err := intr.Execute(node.Children[0], value, context)
 		if err != nil {
 			return nil, err
 		}
@@ -53,11 +53,11 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 			return -num, nil
 		}
 	case parsing.ASTArithmeticExpression:
-		left, err := intr.Execute(node.Children[0], value)
+		left, err := intr.Execute(node.Children[0], value, context)
 		if err != nil {
 			return nil, err
 		}
-		right, err := intr.Execute(node.Children[1], value)
+		right, err := intr.Execute(node.Children[1], value, context)
 		if err != nil {
 			return nil, err
 		}
@@ -86,11 +86,11 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 			return math.Floor(leftNum / rightNum), nil
 		}
 	case parsing.ASTComparator:
-		left, err := intr.Execute(node.Children[0], value)
+		left, err := intr.Execute(node.Children[0], value, context)
 		if err != nil {
 			return nil, err
 		}
-		right, err := intr.Execute(node.Children[1], value)
+		right, err := intr.Execute(node.Children[1], value, context)
 		if err != nil {
 			return nil, err
 		}
@@ -120,12 +120,12 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 		}
 	case parsing.ASTExpRef:
 		return func(data interface{}) (interface{}, error) {
-			return intr.Execute(node.Children[0], data)
+			return intr.Execute(node.Children[0], data, context)
 		}, nil
 	case parsing.ASTFunctionExpression:
 		resolvedArgs := []interface{}{}
 		for _, arg := range node.Children {
-			current, err := intr.Execute(arg, value)
+			current, err := intr.Execute(arg, value, context)
 			if err != nil {
 				return nil, err
 			}
@@ -147,26 +147,26 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 		}
 		return nil, nil
 	case parsing.ASTFilterProjection:
-		left, err := intr.Execute(node.Children[0], value)
+		left, err := intr.Execute(node.Children[0], value, context)
 		if err != nil {
 			return nil, nil
 		}
 		sliceType, ok := left.([]interface{})
 		if !ok {
 			if util.IsSliceType(left) {
-				return intr.filterProjectionWithReflection(node, left)
+				return intr.filterProjectionWithReflection(node, left, context)
 			}
 			return nil, nil
 		}
 		compareNode := node.Children[2]
 		collected := []interface{}{}
 		for _, element := range sliceType {
-			result, err := intr.Execute(compareNode, element)
+			result, err := intr.Execute(compareNode, element, context)
 			if err != nil {
 				return nil, err
 			}
 			if !util.IsFalse(result) {
-				current, err := intr.Execute(node.Children[1], element)
+				current, err := intr.Execute(node.Children[1], element, context)
 				if err != nil {
 					return nil, err
 				}
@@ -177,7 +177,7 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 		}
 		return collected, nil
 	case parsing.ASTFlatten:
-		left, err := intr.Execute(node.Children[0], value)
+		left, err := intr.Execute(node.Children[0], value, context)
 		if err != nil {
 			return nil, nil
 		}
@@ -236,7 +236,7 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 		}
 		return nil, nil
 	case parsing.ASTKeyValPair:
-		return intr.Execute(node.Children[0], value)
+		return intr.Execute(node.Children[0], value, context)
 	case parsing.ASTLiteral:
 		return node.Value, nil
 	case parsing.ASTMultiSelectHash:
@@ -245,7 +245,7 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 		}
 		collected := make(map[string]interface{})
 		for _, child := range node.Children {
-			current, err := intr.Execute(child, value)
+			current, err := intr.Execute(child, value, context)
 			if err != nil {
 				return nil, err
 			}
@@ -256,7 +256,7 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 	case parsing.ASTMultiSelectList:
 		collected := []interface{}{}
 		for _, child := range node.Children {
-			current, err := intr.Execute(child, value)
+			current, err := intr.Execute(child, value, context)
 			if err != nil {
 				return nil, err
 			}
@@ -264,28 +264,28 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 		}
 		return collected, nil
 	case parsing.ASTOrExpression:
-		matched, err := intr.Execute(node.Children[0], value)
+		matched, err := intr.Execute(node.Children[0], value, context)
 		if err != nil {
 			return nil, err
 		}
 		if util.IsFalse(matched) {
-			matched, err = intr.Execute(node.Children[1], value)
+			matched, err = intr.Execute(node.Children[1], value, context)
 			if err != nil {
 				return nil, err
 			}
 		}
 		return matched, nil
 	case parsing.ASTAndExpression:
-		matched, err := intr.Execute(node.Children[0], value)
+		matched, err := intr.Execute(node.Children[0], value, context)
 		if err != nil {
 			return nil, err
 		}
 		if util.IsFalse(matched) {
 			return matched, nil
 		}
-		return intr.Execute(node.Children[1], value)
+		return intr.Execute(node.Children[1], value, context)
 	case parsing.ASTNotExpression:
-		matched, err := intr.Execute(node.Children[0], value)
+		matched, err := intr.Execute(node.Children[0], value, context)
 		if err != nil {
 			return nil, err
 		}
@@ -297,7 +297,7 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 		result := value
 		var err error
 		for _, child := range node.Children {
-			result, err = intr.Execute(child, result)
+			result, err = intr.Execute(child, result, context)
 			if err != nil {
 				return nil, err
 			}
@@ -323,7 +323,7 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 			}
 		}
 
-		left, err := intr.Execute(node.Children[0], value)
+		left, err := intr.Execute(node.Children[0], value, context)
 		if err != nil {
 			return nil, err
 		}
@@ -331,7 +331,7 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 		sliceType, ok := left.([]interface{})
 		if !ok {
 			if util.IsSliceType(left) {
-				return intr.projectWithReflection(node, left)
+				return intr.projectWithReflection(node, left, context)
 			}
 			stringType, ok := left.(string)
 			if allowString && ok {
@@ -342,7 +342,7 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 		collected := []interface{}{}
 		var current interface{}
 		for _, element := range sliceType {
-			current, err = intr.Execute(node.Children[1], element)
+			current, err = intr.Execute(node.Children[1], element, context)
 			if err != nil {
 				return nil, err
 			}
@@ -352,14 +352,14 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 		}
 		return collected, nil
 	case parsing.ASTSubexpression, parsing.ASTIndexExpression:
-		left, err := intr.Execute(node.Children[0], value)
+		left, err := intr.Execute(node.Children[0], value, context)
 		if err != nil {
 			return nil, err
 		}
 		if left == nil {
 			return nil, nil
 		}
-		return intr.Execute(node.Children[1], left)
+		return intr.Execute(node.Children[1], left, context)
 	case parsing.ASTSlice:
 		parts := node.Value.([]*int)
 		sliceType, ok := value.([]interface{})
@@ -384,7 +384,7 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 		sliceParams := util.MakeSliceParams(parts)
 		return util.Slice(sliceType, sliceParams)
 	case parsing.ASTValueProjection:
-		left, err := intr.Execute(node.Children[0], value)
+		left, err := intr.Execute(node.Children[0], value, context)
 		if err != nil {
 			return nil, nil
 		}
@@ -398,7 +398,7 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 		}
 		collected := []interface{}{}
 		for _, element := range values {
-			current, err := intr.Execute(node.Children[1], element)
+			current, err := intr.Execute(node.Children[1], element, context)
 			if err != nil {
 				return nil, err
 			}
@@ -475,18 +475,18 @@ func (intr *treeInterpreter) sliceWithReflection(node parsing.ASTNode, value int
 	return util.Slice(final, sliceParams)
 }
 
-func (intr *treeInterpreter) filterProjectionWithReflection(node parsing.ASTNode, value interface{}) (interface{}, error) {
+func (intr *treeInterpreter) filterProjectionWithReflection(node parsing.ASTNode, value interface{}, context interface{}) (interface{}, error) {
 	compareNode := node.Children[2]
 	collected := []interface{}{}
 	v := reflect.ValueOf(value)
 	for i := 0; i < v.Len(); i++ {
 		element := v.Index(i).Interface()
-		result, err := intr.Execute(compareNode, element)
+		result, err := intr.Execute(compareNode, element, context)
 		if err != nil {
 			return nil, err
 		}
 		if !util.IsFalse(result) {
-			current, err := intr.Execute(node.Children[1], element)
+			current, err := intr.Execute(node.Children[1], element, context)
 			if err != nil {
 				return nil, err
 			}
@@ -498,12 +498,12 @@ func (intr *treeInterpreter) filterProjectionWithReflection(node parsing.ASTNode
 	return collected, nil
 }
 
-func (intr *treeInterpreter) projectWithReflection(node parsing.ASTNode, value interface{}) (interface{}, error) {
+func (intr *treeInterpreter) projectWithReflection(node parsing.ASTNode, value interface{}, context interface{}) (interface{}, error) {
 	collected := []interface{}{}
 	v := reflect.ValueOf(value)
 	for i := 0; i < v.Len(); i++ {
 		element := v.Index(i).Interface()
-		result, err := intr.Execute(node.Children[1], element)
+		result, err := intr.Execute(node.Children[1], element, context)
 		if err != nil {
 			return nil, err
 		}

@@ -53,7 +53,7 @@ func search(t *testing.T, expression string, data interface{}) (interface{}, err
 	}
 	caller := NewFunctionCaller(functions.GetDefaultFunctions()...)
 	intr := NewInterpreter(nil, caller)
-	return intr.Execute(ast, data)
+	return intr.Execute(ast, data, nil)
 }
 
 func TestCanSupportEmptyInterface(t *testing.T) {
@@ -203,7 +203,7 @@ func BenchmarkInterpretSingleFieldStruct(b *testing.B) {
 	ast, _ := parser.Parse("fooasdfasdfasdfasdf")
 	data := benchmarkStruct{"foobarbazqux"}
 	for i := 0; i < b.N; i++ {
-		_, err := intr.Execute(ast, data)
+		_, err := intr.Execute(ast, data, nil)
 		if err != nil {
 			assert.Fail("Received error from interpreter")
 		}
@@ -224,7 +224,7 @@ func BenchmarkInterpretNestedStruct(b *testing.B) {
 		},
 	}
 	for i := 0; i < b.N; i++ {
-		_, err := intr.Execute(ast, data)
+		_, err := intr.Execute(ast, data, nil)
 		if err != nil {
 			assert.Fail("Received error from interpreter")
 		}
@@ -242,7 +242,7 @@ func BenchmarkInterpretNestedMaps(b *testing.B) {
 	parser := parsing.NewParser()
 	ast, _ := parser.Parse("fooasdfasdfasdfasdf.fooasdfasdfasdfasdf.fooasdfasdfasdfasdf.fooasdfasdfasdfasdf")
 	for i := 0; i < b.N; i++ {
-		_, err := intr.Execute(ast, data)
+		_, err := intr.Execute(ast, data, nil)
 		if err != nil {
 			assert.Fail("Received error from interpreter")
 		}
