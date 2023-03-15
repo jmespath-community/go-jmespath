@@ -294,7 +294,7 @@ func jpfLower(arguments []interface{}, _ interface{}) (interface{}, error) {
 	return strings.ToLower(arguments[0].(string)), nil
 }
 
-func jpfMap(arguments []interface{}) (interface{}, error) {
+func jpfMap(arguments []interface{}, _ interface{}) (interface{}, error) {
 	exp := arguments[0].(ExpRef)
 	arr := arguments[1].([]interface{})
 	mapped := make([]interface{}, 0, len(arr))
