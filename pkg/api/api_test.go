@@ -126,7 +126,7 @@ func TestSearch(t *testing.T) {
 		want: nil,
 	}, {
 		args: args{
-			expression: `use_context(&@.a)`,
+			expression: `use_context(&a)`,
 			data: map[string]interface{}{
 				"a": 64.0,
 			},
@@ -135,6 +135,28 @@ func TestSearch(t *testing.T) {
 			},
 		},
 		want: 42.0,
+	}, {
+		args: args{
+			expression: `with_context({ a: 'abc' }, &use_context(&a))`,
+			data: map[string]interface{}{
+				"a": 64.0,
+			},
+			context: map[string]interface{}{
+				"a": 42.0,
+			},
+		},
+		want: "abc",
+	}, {
+		args: args{
+			expression: `with_context({ a: 'abc' }, &[ a, use_context(&a) ])`,
+			data: map[string]interface{}{
+				"a": 64.0,
+			},
+			context: map[string]interface{}{
+				"a": 42.0,
+			},
+		},
+		want: []interface{}{64.0, "abc"},
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
