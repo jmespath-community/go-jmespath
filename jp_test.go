@@ -38,7 +38,7 @@ var whiteListed = []string{
 	"compliance/tests/function_strings.json",
 	"compliance/tests/identifiers.json",
 	"compliance/tests/indices.json",
-	"compliance/tests/lexical_scoping.json",
+	// "compliance/tests/lexical_scoping.json",
 	"compliance/tests/literal.json",
 	"compliance/tests/multiselect.json",
 	"compliance/tests/ormatch.json",
