@@ -101,13 +101,6 @@ func GetDefaultFunctions() []FunctionEntry {
 			{Types: []JpType{JpString}},
 		},
 		Handler: jpfLower,
-		// }, {
-		// 	Name: "let",
-		// 	Arguments: []ArgSpec{
-		// 		{Types: []JpType{JpObject}},
-		// 		{Types: []JpType{JpExpref}},
-		// 	},
-		// 	Handler: jpfLet,
 	}, {
 		Name: "map",
 		Arguments: []ArgSpec{

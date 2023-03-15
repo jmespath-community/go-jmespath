@@ -18,7 +18,7 @@ import (
 
 type (
 	JpFunction = func([]interface{}) (interface{}, error)
-	ExpRef     = func(interface{} /*, map[string]interface{}*/) (interface{}, error)
+	ExpRef     = func(interface{}) (interface{}, error)
 	JpType     string
 )
 
