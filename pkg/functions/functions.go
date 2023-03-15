@@ -294,16 +294,6 @@ func jpfLower(arguments []interface{}) (interface{}, error) {
 	return strings.ToLower(arguments[0].(string)), nil
 }
 
-// func jpfLet(arguments []interface{}) (interface{}, error) {
-// 	scope := arguments[0].(map[string]interface{})
-// 	exp := arguments[1].(ExpRef)
-// 	result, err := exp(nil, scope)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return result, nil
-// }
-
 func jpfMap(arguments []interface{}) (interface{}, error) {
 	exp := arguments[0].(ExpRef)
 	arr := arguments[1].([]interface{})
