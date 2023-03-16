@@ -123,6 +123,13 @@ func TestSearch(t *testing.T) {
 			},
 		},
 		want: nil,
+	}, {
+		args: args{
+			expression: "`null` | {foo: @}",
+		},
+		want: map[string]interface{}{
+			"foo": nil,
+		},
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
