@@ -13,6 +13,7 @@ generate:
 
 build:
 	rm -f $(CMD)
+	git submodule update --init --checkout --recursive --force
 	go build ./...
 	rm -f cmd/$(CMD)/$(CMD) && cd cmd/$(CMD)/ && go build ./...
 	mv cmd/$(CMD)/$(CMD) .
