@@ -240,9 +240,6 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 	case parsing.ASTLiteral:
 		return node.Value, nil
 	case parsing.ASTMultiSelectHash:
-		if value == nil {
-			return nil, nil
-		}
 		collected := make(map[string]interface{})
 		for _, child := range node.Children {
 			current, err := intr.Execute(child, value)
