@@ -126,6 +126,13 @@ func TestSearch(t *testing.T) {
 		want: nil,
 	}, {
 		args: args{
+			expression: "`null` | {foo: @}",
+		},
+		want: map[string]interface{}{
+			"foo": nil,
+		},
+	}, {
+		args: args{
 			expression: `use_context(&a)`,
 			data: map[string]interface{}{
 				"a": 64.0,
