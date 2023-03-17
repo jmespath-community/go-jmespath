@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/jmespath-community/go-jmespath/pkg/parsing"
@@ -24,34 +25,19 @@ type TestCase struct {
 	Error      string
 }
 
-var whiteListed = []string{
-	"compliance/tests/jep-12/jep-12-literal.json",
-	"compliance/tests/arithmetic.json",
-	"compliance/tests/basic.json",
-	"compliance/tests/boolean.json",
-	"compliance/tests/current.json",
-	"compliance/tests/escape.json",
-	"compliance/tests/filters.json",
-	"compliance/tests/functions.json",
-	"compliance/tests/function_group_by.json",
-	// "compliance/tests/function_let.json",
-	"compliance/tests/function_strings.json",
-	"compliance/tests/identifiers.json",
-	"compliance/tests/indices.json",
-	"compliance/tests/literal.json",
-	"compliance/tests/multiselect.json",
-	"compliance/tests/ormatch.json",
-	// "compliance/tests/pipe.json",
-	"compliance/tests/root_node.json",
-	"compliance/tests/slice.json",
-	"compliance/tests/syntax.json",
-	"compliance/tests/unicode.json",
-	"compliance/tests/wildcard.json",
+var excludeList = []string{
+	"legacy/legacy-literal.json",
+	"benchmarks.json",
+	"function_let.json",
+	"lexical_scoping.json",
+
+	// this test currently fails
+	"literal.json",
 }
 
-func allowed(path string) bool {
-	for _, el := range whiteListed {
-		if el == path {
+func excluded(path string) bool {
+	for _, el := range excludeList {
+		if strings.HasSuffix(path, el) {
 			return true
 		}
 	}
@@ -62,9 +48,8 @@ func TestCompliance(t *testing.T) {
 	assert := assert.New(t)
 
 	var complianceFiles []string
-	err := filepath.Walk("compliance", func(path string, _ os.FileInfo, _ error) error {
-		// if strings.HasSuffix(path, ".json") {
-		if allowed(path) {
+	err := filepath.Walk("compliance/tests", func(path string, _ os.FileInfo, _ error) error {
+		if strings.HasSuffix(path, ".json") && !excluded(path) {
 			complianceFiles = append(complianceFiles, path)
 		}
 		return nil
