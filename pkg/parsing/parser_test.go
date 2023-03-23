@@ -14,7 +14,7 @@ func TestParsingVariable(t *testing.T) {
 		{tokenType: TOKEOF, position: 19},
 	}
 
-	var prettyPrintedLookup = `ASTVariable {
+	prettyPrintedLookup := `ASTVariable {
   value: "foo"
 }
 `
@@ -32,7 +32,7 @@ func TestParsingVariableBinding(t *testing.T) {
 		{tokenType: TOKEOF, position: 19},
 	}
 
-	var prettyPrintedLookup = `ASTBinding {
+	prettyPrintedLookup := `ASTBinding {
   children: {
     ASTVariable {
       value: "foo"
