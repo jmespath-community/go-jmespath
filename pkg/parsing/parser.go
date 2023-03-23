@@ -273,20 +273,8 @@ func (p *Parser) led(tokenType TokType, node ASTNode) (ASTNode, error) {
 			return ASTNode{}, p.syntaxErrorToken("Invalid node as function name.", p.lookaheadToken(-2))
 		}
 		name := node.Value
-		var args []ASTNode
-		for p.current() != TOKRparen {
-			expression, err := p.parseExpression(0)
-			if err != nil {
-				return ASTNode{}, err
-			}
-			if p.current() == TOKComma {
-				if err := p.match(TOKComma); err != nil {
-					return ASTNode{}, err
-				}
-			}
-			args = append(args, expression)
-		}
-		if err := p.match(TOKRparen); err != nil {
+		args, err := p.parseCommaSeparatedExpressions(TOKRparen)
+		if err != nil {
 			return ASTNode{}, err
 		}
 		return ASTNode{
@@ -357,20 +345,8 @@ func (p *Parser) nud(token token) (ASTNode, error) {
 	switch token.tokenType {
 	case TOKLet:
 		{
-			var bindings []ASTNode
-			for p.current() != TOKIn {
-				binding, err := p.parseExpression(0)
-				if err != nil {
-					return ASTNode{}, err
-				}
-				if p.current() == TOKComma {
-					if err := p.match(TOKComma); err != nil {
-						return ASTNode{}, err
-					}
-				}
-				bindings = append(bindings, binding)
-			}
-			if err := p.match(TOKIn); err != nil {
+			bindings, err := p.parseCommaSeparatedExpressions(TOKIn)
+			if err != nil {
 				return ASTNode{}, err
 			}
 			expression, err := p.parseExpression(0)
@@ -642,6 +618,26 @@ func (p *Parser) parseProjectionRHS(bindingPower int) (ASTNode, error) {
 	} else {
 		return ASTNode{}, p.syntaxError("Error")
 	}
+}
+
+func (p *Parser) parseCommaSeparatedExpressions(endToken TokType) ([]ASTNode, error) {
+	var nodes []ASTNode
+	for p.current() != endToken {
+		expression, err := p.parseExpression(0)
+		if err != nil {
+			return []ASTNode{}, err
+		}
+		if p.current() == TOKComma {
+			if err := p.match(TOKComma); err != nil {
+				return []ASTNode{}, err
+			}
+		}
+		nodes = append(nodes, expression)
+	}
+	if err := p.match(endToken); err != nil {
+		return []ASTNode{}, err
+	}
+	return nodes, nil
 }
 
 func (p *Parser) parseComparatorExpression(left ASTNode, tokenType TokType) (ASTNode, error) {
