@@ -45,16 +45,14 @@ func _() {
 	_ = x[TOKExpref-34]
 	_ = x[TOKAnd-35]
 	_ = x[TOKNot-36]
-	_ = x[TOKLet-37]
-	_ = x[TOKIn-38]
-	_ = x[TOKVarref-39]
-	_ = x[TOKAssign-40]
-	_ = x[TOKEOF-41]
+	_ = x[TOKVarref-37]
+	_ = x[TOKAssign-38]
+	_ = x[TOKEOF-39]
 }
 
-const _TokType_name = "TOKUnknownTOKStarTOKDotTOKFilterTOKFlattenTOKLparenTOKRparenTOKLbracketTOKRbracketTOKLbraceTOKRbraceTOKOrTOKPipeTOKNumberTOKUnquotedIdentifierTOKQuotedIdentifierTOKCommaTOKColonTOKPlusTOKMinusTOKMultiplyTOKDivideTOKModuloTOKDivTOKLTTOKLTETOKGTTOKGTETOKEQTOKNETOKJSONLiteralTOKStringLiteralTOKCurrentTOKRootTOKExprefTOKAndTOKNotTOKLetTOKInTOKVarrefTOKAssignTOKEOF"
+const _TokType_name = "TOKUnknownTOKStarTOKDotTOKFilterTOKFlattenTOKLparenTOKRparenTOKLbracketTOKRbracketTOKLbraceTOKRbraceTOKOrTOKPipeTOKNumberTOKUnquotedIdentifierTOKQuotedIdentifierTOKCommaTOKColonTOKPlusTOKMinusTOKMultiplyTOKDivideTOKModuloTOKDivTOKLTTOKLTETOKGTTOKGTETOKEQTOKNETOKJSONLiteralTOKStringLiteralTOKCurrentTOKRootTOKExprefTOKAndTOKNotTOKVarrefTOKAssignTOKEOF"
 
-var _TokType_index = [...]uint16{0, 10, 17, 23, 32, 42, 51, 60, 71, 82, 91, 100, 105, 112, 121, 142, 161, 169, 177, 184, 192, 203, 212, 221, 227, 232, 238, 243, 249, 254, 259, 273, 289, 299, 306, 315, 321, 327, 333, 338, 347, 356, 362}
+var _TokType_index = [...]uint16{0, 10, 17, 23, 32, 42, 51, 60, 71, 82, 91, 100, 105, 112, 121, 142, 161, 169, 177, 184, 192, 203, 212, 221, 227, 232, 238, 243, 249, 254, 259, 273, 289, 299, 306, 315, 321, 327, 336, 345, 351}
 
 func (i TokType) String() string {
 	if i < 0 || i >= TokType(len(_TokType_index)-1) {

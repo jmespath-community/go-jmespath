@@ -54,11 +54,11 @@ func TestParsingLetExpression(t *testing.T) {
 	//           1         2
 	assert := assert.New(t)
 	tokens := []token{
-		{tokenType: TOKLet, value: "let", position: 0, length: 3},
+		{tokenType: TOKUnquotedIdentifier, value: "let", position: 0, length: 3},
 		{tokenType: TOKVarref, value: "foo", position: 4, length: 4},
 		{tokenType: TOKAssign, value: "=", position: 9, length: 1},
 		{tokenType: TOKUnquotedIdentifier, value: "foo", position: 11, length: 3},
-		{tokenType: TOKIn, value: "in", position: 15, length: 2},
+		{tokenType: TOKUnquotedIdentifier, value: "in", position: 15, length: 2},
 		{tokenType: TOKCurrent, value: "@", position: 18, length: 1},
 		{tokenType: TOKEOF, position: 19},
 	}

@@ -232,6 +232,18 @@ func (p *Parser) parseSliceExpression() (ASTNode, error) {
 	}, nil
 }
 
+func isKeyword(token token, keyword string) bool {
+	return token.tokenType == TOKUnquotedIdentifier && token.value == keyword
+}
+
+func (p *Parser) matchKeyword(keyword string) error {
+	if isKeyword(p.lookaheadToken(0), keyword) {
+		p.advance()
+		return nil
+	}
+	return p.syntaxError("Expected keyword " + keyword + ", received: " + p.current().String())
+}
+
 func (p *Parser) match(tokenType TokType) error {
 	if p.current() == tokenType {
 		p.advance()
@@ -273,7 +285,7 @@ func (p *Parser) led(tokenType TokType, node ASTNode) (ASTNode, error) {
 			return ASTNode{}, p.syntaxErrorToken("Invalid node as function name.", p.lookaheadToken(-2))
 		}
 		name := node.Value
-		args, err := p.parseCommaSeparatedExpressions(TOKRparen)
+		args, err := p.parseCommaSeparatedExpressionsUntilToken(TOKRparen)
 		if err != nil {
 			return ASTNode{}, err
 		}
@@ -343,27 +355,6 @@ func (p *Parser) led(tokenType TokType, node ASTNode) (ASTNode, error) {
 
 func (p *Parser) nud(token token) (ASTNode, error) {
 	switch token.tokenType {
-	case TOKLet:
-		{
-			bindings, err := p.parseCommaSeparatedExpressions(TOKIn)
-			if err != nil {
-				return ASTNode{}, err
-			}
-			expression, err := p.parseExpression(0)
-			if err != nil {
-				return ASTNode{}, err
-			}
-			return ASTNode{
-				NodeType: ASTLetExpression,
-				Children: []ASTNode{
-					{
-						NodeType: ASTBindings,
-						Children: bindings,
-					},
-					expression,
-				},
-			}, nil
-		}
 	case TOKVarref:
 		return ASTNode{
 			NodeType: ASTVariable,
@@ -379,10 +370,14 @@ func (p *Parser) nud(token token) (ASTNode, error) {
 	case TOKStringLiteral:
 		return ASTNode{NodeType: ASTLiteral, Value: token.value}, nil
 	case TOKUnquotedIdentifier:
-		return ASTNode{
-			NodeType: ASTField,
-			Value:    token.value,
-		}, nil
+		if token.value == "let" && p.current() == TOKVarref {
+			return p.parseLetExpression()
+		} else {
+			return ASTNode{
+				NodeType: ASTField,
+				Value:    token.value,
+			}, nil
+		}
 	case TOKQuotedIdentifier:
 		node := ASTNode{NodeType: ASTField, Value: token.value}
 		if p.current() == TOKLparen {
@@ -620,9 +615,44 @@ func (p *Parser) parseProjectionRHS(bindingPower int) (ASTNode, error) {
 	}
 }
 
-func (p *Parser) parseCommaSeparatedExpressions(endToken TokType) ([]ASTNode, error) {
+func (p *Parser) parseLetExpression() (ASTNode, error) {
+	bindings, err := p.parseCommaSeparatedExpressionsUntilKeyword("in")
+	if err != nil {
+		return ASTNode{}, err
+	}
+	expression, err := p.parseExpression(0)
+	if err != nil {
+		return ASTNode{}, err
+	}
+	return ASTNode{
+		NodeType: ASTLetExpression,
+		Children: []ASTNode{
+			{
+				NodeType: ASTBindings,
+				Children: bindings,
+			},
+			expression,
+		},
+	}, nil
+}
+
+func (p *Parser) parseCommaSeparatedExpressionsUntilKeyword(keyword string) ([]ASTNode, error) {
+	return p.parseCommaSeparatedExpressionsUntil(
+		func() bool {
+			return isKeyword(p.lookaheadToken(0), keyword)
+		},
+		func() error { return p.matchKeyword(keyword) })
+}
+
+func (p *Parser) parseCommaSeparatedExpressionsUntilToken(endToken TokType) ([]ASTNode, error) {
+	return p.parseCommaSeparatedExpressionsUntil(
+		func() bool { return p.current() == endToken },
+		func() error { return p.match(endToken) })
+}
+
+func (p *Parser) parseCommaSeparatedExpressionsUntil(isEndToken func() bool, matchEndToken func() error) ([]ASTNode, error) {
 	var nodes []ASTNode
-	for p.current() != endToken {
+	for !isEndToken() {
 		expression, err := p.parseExpression(0)
 		if err != nil {
 			return []ASTNode{}, err
@@ -634,7 +664,7 @@ func (p *Parser) parseCommaSeparatedExpressions(endToken TokType) ([]ASTNode, er
 		}
 		nodes = append(nodes, expression)
 	}
-	if err := p.match(endToken); err != nil {
+	if err := matchEndToken(); err != nil {
 		return []ASTNode{}, err
 	}
 	return nodes, nil

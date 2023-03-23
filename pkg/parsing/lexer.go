@@ -87,8 +87,6 @@ const (
 	TOKExpref
 	TOKAnd
 	TOKNot
-	TOKLet
-	TOKIn
 	TOKVarref
 	TOKAssign
 	TOKEOF
