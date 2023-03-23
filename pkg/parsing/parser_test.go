@@ -99,7 +99,46 @@ var parseLetExpressionsErrorsTest = []struct {
 			{tokenType: TOKUnquotedIdentifier, value: "in", position: 15, length: 2},
 			{tokenType: TOKEOF, position: 19},
 		},
-		"",
+		"Incomplete expression",
+	},
+	{
+		[]token{
+			{tokenType: TOKUnquotedIdentifier, value: "let", position: 0, length: 3},
+			{tokenType: TOKVarref, value: "foo", position: 4, length: 4},
+			{tokenType: TOKAssign, value: "=", position: 9, length: 1},
+			{tokenType: TOKUnquotedIdentifier, value: "foo", position: 11, length: 3},
+			{tokenType: TOKUnquotedIdentifier, value: "of", position: 15, length: 2},
+			{tokenType: TOKEOF, position: 19},
+		},
+		"Invalid keyword 'of'",
+	},
+	{
+		[]token{
+			// let $foo = , foo in
+			//           ^
+			{tokenType: TOKUnquotedIdentifier, value: "let", position: 0, length: 3},
+			{tokenType: TOKVarref, value: "foo", position: 4, length: 4},
+			{tokenType: TOKAssign, value: "=", position: 9, length: 1},
+			{tokenType: TOKAssign, value: ",", position: 9, length: 1},
+			{tokenType: TOKUnquotedIdentifier, value: "foo", position: 11, length: 3},
+			{tokenType: TOKUnquotedIdentifier, value: "of", position: 15, length: 2},
+			{tokenType: TOKEOF, position: 19},
+		},
+		"Invalid comma-separated list",
+	},
+	{
+		[]token{
+			// let $foo = foo in {
+			//                    ^
+			{tokenType: TOKUnquotedIdentifier, value: "let", position: 0, length: 3},
+			{tokenType: TOKVarref, value: "foo", position: 4, length: 4},
+			{tokenType: TOKAssign, value: "=", position: 9, length: 1},
+			{tokenType: TOKUnquotedIdentifier, value: "foo", position: 11, length: 3},
+			{tokenType: TOKUnquotedIdentifier, value: "in", position: 15, length: 2},
+			{tokenType: TOKLbrace, value: "{", position: 17, length: 2},
+			{tokenType: TOKEOF, position: 19},
+		},
+		"Syntax error",
 	},
 }
 
