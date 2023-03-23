@@ -37,6 +37,10 @@ const (
 	ASTSubexpression
 	ASTSlice
 	ASTValueProjection
+	ASTLetExpression
+	ASTVariable
+	ASTBindings
+	ASTBinding
 )
 
 // ASTNode represents the abstract syntax tree of a JMESPath expression.
@@ -83,6 +87,7 @@ func (node ASTNode) PrettyPrint(indent int) string {
 
 var bindingPowers = map[TokType]int{
 	TOKEOF:                0,
+	TOKVarref:             0,
 	TOKUnquotedIdentifier: 0,
 	TOKQuotedIdentifier:   0,
 	TOKRbracket:           0,
@@ -93,6 +98,7 @@ var bindingPowers = map[TokType]int{
 	TOKCurrent:            0,
 	TOKExpref:             0,
 	TOKColon:              0,
+	TOKAssign:             1,
 	TOKPipe:               1,
 	TOKOr:                 2,
 	TOKAnd:                3,
@@ -140,6 +146,10 @@ func (p *Parser) Parse(expression string) (ASTNode, error) {
 	if err != nil {
 		return ASTNode{}, err
 	}
+	return p.parseTokens(tokens)
+}
+
+func (p *Parser) parseTokens(tokens []token) (ASTNode, error) {
 	p.tokens = tokens
 	parsed, err := p.parseExpression(0)
 	if err != nil {
@@ -303,16 +313,16 @@ func (p *Parser) led(tokenType TokType, node ASTNode) (ASTNode, error) {
 			Value:    tokenType,
 			Children: []ASTNode{node, right},
 		}, nil
-	case TOKEQ, TOKNE, TOKGT, TOKGTE, TOKLT, TOKLTE:
-		right, err := p.parseExpression(bindingPowers[tokenType])
-		if err != nil {
-			return ASTNode{}, err
+	case TOKAssign:
+		{
+			right, err := p.parseExpression(bindingPowers[0])
+			return ASTNode{
+				NodeType: ASTBinding,
+				Children: []ASTNode{node, right},
+			}, err
 		}
-		return ASTNode{
-			NodeType: ASTComparator,
-			Value:    tokenType,
-			Children: []ASTNode{node, right},
-		}, nil
+	case TOKEQ, TOKNE, TOKGT, TOKGTE, TOKLT, TOKLTE:
+		return p.parseComparatorExpression(node, tokenType)
 	case TOKLbracket:
 		tokenType := p.current()
 		var right ASTNode
@@ -345,6 +355,44 @@ func (p *Parser) led(tokenType TokType, node ASTNode) (ASTNode, error) {
 
 func (p *Parser) nud(token token) (ASTNode, error) {
 	switch token.tokenType {
+	case TOKLet:
+		{
+			var bindings []ASTNode
+			for p.current() != TOKIn {
+				binding, err := p.parseExpression(0)
+				if err != nil {
+					return ASTNode{}, err
+				}
+				if p.current() == TOKComma {
+					if err := p.match(TOKComma); err != nil {
+						return ASTNode{}, err
+					}
+				}
+				bindings = append(bindings, binding)
+			}
+			if err := p.match(TOKIn); err != nil {
+				return ASTNode{}, err
+			}
+			expression, err := p.parseExpression(0)
+			if err != nil {
+				return ASTNode{}, err
+			}
+			return ASTNode{
+				NodeType: ASTLetExpression,
+				Children: []ASTNode{
+					{
+						NodeType: ASTBindings,
+						Children: bindings,
+					},
+					expression,
+				},
+			}, nil
+		}
+	case TOKVarref:
+		return ASTNode{
+			NodeType: ASTVariable,
+			Value:    token.value,
+		}, nil
 	case TOKJSONLiteral:
 		var parsed interface{}
 		err := json.Unmarshal([]byte(token.value), &parsed)
@@ -594,6 +642,18 @@ func (p *Parser) parseProjectionRHS(bindingPower int) (ASTNode, error) {
 	} else {
 		return ASTNode{}, p.syntaxError("Error")
 	}
+}
+
+func (p *Parser) parseComparatorExpression(left ASTNode, tokenType TokType) (ASTNode, error) {
+	right, err := p.parseExpression(bindingPowers[tokenType])
+	if err != nil {
+		return ASTNode{}, err
+	}
+	return ASTNode{
+		NodeType: ASTComparator,
+		Value:    tokenType,
+		Children: []ASTNode{left, right},
+	}, nil
 }
 
 func (p *Parser) lookahead(number int) TokType {

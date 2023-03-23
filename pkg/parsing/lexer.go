@@ -87,6 +87,10 @@ const (
 	TOKExpref
 	TOKAnd
 	TOKNot
+	TOKLet
+	TOKIn
+	TOKVarref
+	TOKAssign
 	TOKEOF
 )
 
@@ -228,7 +232,7 @@ loop:
 			t := lexer.matchOrElse(r, '=', TOKNE, TOKNot)
 			tokens = append(tokens, t)
 		} else if r == '=' {
-			t := lexer.matchOrElse(r, '=', TOKEQ, TOKUnknown)
+			t := lexer.matchOrElse(r, '=', TOKEQ, TOKAssign)
 			tokens = append(tokens, t)
 		} else if r == '&' {
 			t := lexer.matchOrElse(r, '&', TOKAnd, TOKExpref)

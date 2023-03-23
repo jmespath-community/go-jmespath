@@ -7,6 +7,88 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestParsingVariable(t *testing.T) {
+	assert := assert.New(t)
+	tokens := []token{
+		{tokenType: TOKVarref, value: "foo", position: 20, length: 3},
+		{tokenType: TOKEOF, position: 19},
+	}
+
+	var prettyPrintedLookup = `ASTVariable {
+  value: "foo"
+}
+`
+	p := NewParser()
+	parsed, _ := p.parseTokens(tokens)
+	assert.Equal(prettyPrintedLookup, parsed.PrettyPrint(0))
+}
+
+func TestParsingVariableBinding(t *testing.T) {
+	assert := assert.New(t)
+	tokens := []token{
+		{tokenType: TOKVarref, value: "foo", position: 4, length: 4},
+		{tokenType: TOKAssign, value: "=", position: 9, length: 1},
+		{tokenType: TOKUnquotedIdentifier, value: "foo", position: 11, length: 3},
+		{tokenType: TOKEOF, position: 19},
+	}
+
+	var prettyPrintedLookup = `ASTBinding {
+  children: {
+    ASTVariable {
+      value: "foo"
+    }
+    ASTField {
+      value: "foo"
+    }
+  }
+}
+`
+	p := NewParser()
+	parsed, _ := p.parseTokens(tokens)
+	assert.Equal(prettyPrintedLookup, parsed.PrettyPrint(0))
+}
+
+func TestParsingLetExpression(t *testing.T) {
+	// let $foo = foo in @
+	// 012345678901234567890123
+	//           1         2
+	assert := assert.New(t)
+	tokens := []token{
+		{tokenType: TOKLet, value: "let", position: 0, length: 3},
+		{tokenType: TOKVarref, value: "foo", position: 4, length: 4},
+		{tokenType: TOKAssign, value: "=", position: 9, length: 1},
+		{tokenType: TOKUnquotedIdentifier, value: "foo", position: 11, length: 3},
+		{tokenType: TOKIn, value: "in", position: 15, length: 2},
+		{tokenType: TOKCurrent, value: "@", position: 18, length: 1},
+		{tokenType: TOKEOF, position: 19},
+	}
+
+	expected := `ASTLetExpression {
+  children: {
+    ASTBindings {
+      children: {
+        ASTBinding {
+          children: {
+            ASTVariable {
+              value: "foo"
+            }
+            ASTField {
+              value: "foo"
+            }
+          }
+        }
+      }
+    }
+    ASTCurrentNode {
+    }
+  }
+}
+`
+	p := NewParser()
+	parsed, _ := p.parseTokens(tokens)
+	assert.Equal(expected, parsed.PrettyPrint(0))
+}
+
 var parsingErrorTests = []struct {
 	expression string
 	msg        string
