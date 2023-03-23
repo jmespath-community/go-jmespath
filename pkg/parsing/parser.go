@@ -141,7 +141,6 @@ func NewParser() *Parser {
 func (p *Parser) Parse(expression string) (ASTNode, error) {
 	lexer := NewLexer()
 	p.expression = expression
-	p.index = 0
 	tokens, err := lexer.Tokenize(expression)
 	if err != nil {
 		return ASTNode{}, err
@@ -151,6 +150,7 @@ func (p *Parser) Parse(expression string) (ASTNode, error) {
 
 func (p *Parser) parseTokens(tokens []token) (ASTNode, error) {
 	p.tokens = tokens
+	p.index = 0
 	parsed, err := p.parseExpression(0)
 	if err != nil {
 		return ASTNode{}, err
