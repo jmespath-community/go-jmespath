@@ -75,6 +75,7 @@ func (node ASTNode) PrettyPrint(indent int) string {
 		for _, elem := range node.Children {
 			output += elem.PrettyPrint(childIndent)
 		}
+		output += fmt.Sprintf("%s}\n", strings.Repeat(" ", nextIndent))
 	}
 	output += fmt.Sprintf("%s}\n", spaces)
 	return output

@@ -50,11 +50,14 @@ var prettyPrinted = `ASTProjection {
             ASTField {
               value: "baz"
             }
+          }
         }
         ASTField {
           value: "qux"
         }
+      }
     }
+  }
 }
 `
 
@@ -74,7 +77,9 @@ var prettyPrintedCompNode = `ASTFilterProjection {
         ASTField {
           value: "c"
         }
+      }
     }
+  }
 }
 `
 
