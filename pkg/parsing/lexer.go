@@ -103,7 +103,6 @@ var basicTokens = map[rune]TokType{
 	'(':      TOKLparen,
 	')':      TOKRparen,
 	'@':      TOKCurrent,
-	'$':      TOKRoot,
 	'+':      TOKPlus,
 	'%':      TOKModulo,
 	'\u2212': TOKMinus,
@@ -165,7 +164,7 @@ loop:
 	for {
 		r := lexer.next()
 		if identifierStartBits&(1<<(uint64(r)-64)) > 0 {
-			t := lexer.consumeUnquotedIdentifier()
+			t := lexer.consumeUnquotedIdentifier(TOKUnquotedIdentifier)
 			tokens = append(tokens, t)
 		} else if val, ok := basicTokens[r]; ok {
 			// Basic single char token.
@@ -228,6 +227,12 @@ loop:
 			tokens = append(tokens, t)
 		} else if r == '!' {
 			t := lexer.matchOrElse(r, '=', TOKNE, TOKNot)
+			tokens = append(tokens, t)
+		} else if r == '$' {
+			t := lexer.consumeUnquotedIdentifier(TOKVarref)
+			if t.value == "$" {
+				t.tokenType = TOKRoot
+			}
 			tokens = append(tokens, t)
 		} else if r == '=' {
 			t := lexer.matchOrElse(r, '=', TOKEQ, TOKAssign)
@@ -419,7 +424,7 @@ func (lexer *Lexer) consumeQuotedIdentifier() (token, error) {
 	}, nil
 }
 
-func (lexer *Lexer) consumeUnquotedIdentifier() token {
+func (lexer *Lexer) consumeUnquotedIdentifier(matchedType TokType) token {
 	// Consume runes until we reach the end of an unquoted
 	// identifier.
 	start := lexer.currentPos - lexer.lastWidth
@@ -432,7 +437,7 @@ func (lexer *Lexer) consumeUnquotedIdentifier() token {
 	}
 	value := lexer.expression[start:lexer.currentPos]
 	return token{
-		tokenType: TOKUnquotedIdentifier,
+		tokenType: matchedType,
 		value:     value,
 		position:  start,
 		length:    lexer.currentPos - start,
