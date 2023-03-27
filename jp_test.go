@@ -29,10 +29,6 @@ var excludeList = []string{
 	"legacy/legacy-literal.json",
 	"benchmarks.json",
 	"function_let.json",
-	"lexical_scoping.json",
-
-	// this test currently fails
-	"literal.json",
 }
 
 func excluded(path string) bool {
