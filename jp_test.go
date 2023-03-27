@@ -28,7 +28,6 @@ type TestCase struct {
 var excludeList = []string{
 	"legacy/legacy-literal.json",
 	"benchmarks.json",
-	"function_let.json",
 }
 
 func excluded(path string) bool {
