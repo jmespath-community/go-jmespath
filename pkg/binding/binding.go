@@ -1,5 +1,7 @@
 package binding
 
+import "fmt"
+
 // Bindings stores let expression bindings by name.
 type Bindings interface {
 	// Get returns the value bound for a given name.
@@ -20,8 +22,7 @@ func (b bindings) Get(name string) (interface{}, error) {
 	if value, ok := b.values[name]; ok {
 		return value, nil
 	}
-	// TODO: should return an error
-	return nil, nil
+	return nil, fmt.Errorf("variable not defined: %s", name)
 }
 
 func (b bindings) Register(name string, value interface{}) Bindings {
