@@ -218,19 +218,15 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 	case parsing.ASTRootNode:
 		return intr.root, nil
 	case parsing.ASTBindings:
+		bindings := intr.bindings
 		for _, child := range node.Children {
-			if _, err := intr.Execute(child, value); err != nil {
+			if value, err := intr.Execute(child.Children[1], value); err != nil {
 				return nil, err
+			} else {
+				bindings = bindings.Register(child.Children[0].Value.(string), value)
 			}
 		}
-		// doesn't mutate value
-		return value, nil
-	case parsing.ASTBinding:
-		if value, err := intr.Execute(node.Children[1], value); err != nil {
-			return nil, err
-		} else {
-			intr.bindings = intr.bindings.Register(node.Children[0].Value.(string), value)
-		}
+		intr.bindings = bindings
 		// doesn't mutate value
 		return value, nil
 	case parsing.ASTLetExpression:
