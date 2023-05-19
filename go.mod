@@ -3,7 +3,7 @@ module github.com/jmespath-community/go-jmespath
 go 1.18
 
 require (
-	github.com/stretchr/testify v1.8.2
+	github.com/stretchr/testify v1.8.3
 	golang.org/x/exp v0.0.0-20230314191032-db074128a8ec
 )
 
