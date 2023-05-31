@@ -34,11 +34,15 @@ func _() {
 	_ = x[ASTSubexpression-23]
 	_ = x[ASTSlice-24]
 	_ = x[ASTValueProjection-25]
+	_ = x[ASTLetExpression-26]
+	_ = x[ASTVariable-27]
+	_ = x[ASTBindings-28]
+	_ = x[ASTBinding-29]
 }
 
-const _astNodeType_name = "ASTEmptyASTArithmeticExpressionASTArithmeticUnaryExpressionASTComparatorASTCurrentNodeASTRootNodeASTExpRefASTFunctionExpressionASTFieldASTFilterProjectionASTFlattenASTIdentityASTIndexASTIndexExpressionASTKeyValPairASTLiteralASTMultiSelectHashASTMultiSelectListASTOrExpressionASTAndExpressionASTNotExpressionASTPipeASTProjectionASTSubexpressionASTSliceASTValueProjection"
+const _astNodeType_name = "ASTEmptyASTArithmeticExpressionASTArithmeticUnaryExpressionASTComparatorASTCurrentNodeASTRootNodeASTExpRefASTFunctionExpressionASTFieldASTFilterProjectionASTFlattenASTIdentityASTIndexASTIndexExpressionASTKeyValPairASTLiteralASTMultiSelectHashASTMultiSelectListASTOrExpressionASTAndExpressionASTNotExpressionASTPipeASTProjectionASTSubexpressionASTSliceASTValueProjectionASTLetExpressionASTVariableASTBindingsASTBinding"
 
-var _astNodeType_index = [...]uint16{0, 8, 31, 59, 72, 86, 97, 106, 127, 135, 154, 164, 175, 183, 201, 214, 224, 242, 260, 275, 291, 307, 314, 327, 343, 351, 369}
+var _astNodeType_index = [...]uint16{0, 8, 31, 59, 72, 86, 97, 106, 127, 135, 154, 164, 175, 183, 201, 214, 224, 242, 260, 275, 291, 307, 314, 327, 343, 351, 369, 385, 396, 407, 417}
 
 func (i astNodeType) String() string {
 	if i < 0 || i >= astNodeType(len(_astNodeType_index)-1) {
