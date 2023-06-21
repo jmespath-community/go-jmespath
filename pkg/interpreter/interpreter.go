@@ -371,7 +371,13 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 			}
 			stringType, ok := left.(string)
 			if allowString && ok {
-				return stringType, nil
+				// a projection is really a sub-expression in disguise
+				// we must evaluate the right hand expression
+				result, err := intr.Execute(node.Children[1], stringType)
+				if err != nil {
+					return nil, err
+				}
+				return result, nil
 			}
 			return nil, nil
 		}
