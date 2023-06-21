@@ -193,6 +193,14 @@ func TestCanSupportSliceOfStructsWithFunctions(t *testing.T) {
 	assert.Equal(result.(float64), 2.0)
 }
 
+func TestCanSupportEvaluatingRightHandSideOfStringSlice(t *testing.T) {
+	assert := assert.New(t)
+	data := make(map[string]interface{})
+	result, err := search(t, "'foo'[:].length(@)", data)
+	assert.Nil(err)
+	assert.Equal(result.(float64), 3.0)
+}
+
 func BenchmarkInterpretSingleFieldStruct(b *testing.B) {
 	assert := assert.New(b)
 	intr := NewInterpreter(nil, nil)
