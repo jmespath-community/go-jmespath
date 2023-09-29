@@ -710,15 +710,8 @@ func jpfToNumber(arguments []interface{}) (interface{}, error) {
 	if arg == true || arg == false {
 		return nil, nil
 	}
-	value := reflect.ValueOf(arg)
-	if value.CanFloat() {
-		return value.Float(), nil
-	}
-	if value.CanInt() {
-		return float64(value.Int()), nil
-	}
-	if value.CanUint() {
-		return float64(value.Uint()), nil
+	if value, ok := util.ToNumber(arg); ok {
+		return value, nil
 	}
 	if v, ok := arg.(string); ok {
 		conv, err := strconv.ParseFloat(v, 64)

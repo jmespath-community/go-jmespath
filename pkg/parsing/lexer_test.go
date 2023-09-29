@@ -83,6 +83,13 @@ var lexingTests = []struct {
 		{TOKUnquotedIdentifier, "b", 7, 1},
 		{TOKRbracket, "]", 8, 1},
 	}},
+	// let expressions
+	{"$root", []token{{TOKVarref, "$root", 0, 5}}},
+	{"$root = @", []token{
+		{TOKVarref, "$root", 0, 5},
+		{TOKAssign, "=", 6, 1},
+		{TOKCurrent, "@", 8, 1},
+	}},
 }
 
 func TestCanLexTokens(t *testing.T) {

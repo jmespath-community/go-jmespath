@@ -7,6 +7,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/jmespath-community/go-jmespath/pkg/binding"
 	"github.com/jmespath-community/go-jmespath/pkg/parsing"
 	"github.com/jmespath-community/go-jmespath/pkg/util"
 )
@@ -21,14 +22,19 @@ type Interpreter interface {
 }
 
 type treeInterpreter struct {
-	caller FunctionCaller
-	root   interface{}
+	caller   FunctionCaller
+	root     interface{}
+	bindings binding.Bindings
 }
 
-func NewInterpreter(data interface{}, caller FunctionCaller) Interpreter {
+func NewInterpreter(data interface{}, caller FunctionCaller, bindings binding.Bindings) Interpreter {
+	if bindings == nil {
+		bindings = binding.NewBindings()
+	}
 	return &treeInterpreter{
-		caller: caller,
-		root:   data,
+		caller:   caller,
+		root:     data,
+		bindings: bindings,
 	}
 }
 
@@ -42,7 +48,7 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 		if err != nil {
 			return nil, err
 		}
-		num, ok := expr.(float64)
+		num, ok := util.ToNumber(expr)
 		if !ok {
 			return nil, nil
 		}
@@ -61,11 +67,11 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 		if err != nil {
 			return nil, err
 		}
-		leftNum, ok := left.(float64)
+		leftNum, ok := util.ToNumber(left)
 		if !ok {
 			return nil, nil
 		}
-		rightNum, ok := right.(float64)
+		rightNum, ok := util.ToNumber(right)
 		if !ok {
 			return nil, nil
 		}
@@ -100,11 +106,11 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 		case parsing.TOKNE:
 			return !util.ObjsEqual(left, right), nil
 		}
-		leftNum, ok := left.(float64)
+		leftNum, ok := util.ToNumber(left)
 		if !ok {
 			return nil, nil
 		}
-		rightNum, ok := right.(float64)
+		rightNum, ok := util.ToNumber(right)
 		if !ok {
 			return nil, nil
 		}
@@ -211,6 +217,39 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 		return value, nil
 	case parsing.ASTRootNode:
 		return intr.root, nil
+	case parsing.ASTBindings:
+		bindings := intr.bindings
+		for _, child := range node.Children {
+			if value, err := intr.Execute(child.Children[1], value); err != nil {
+				return nil, err
+			} else {
+				bindings = bindings.Register(child.Children[0].Value.(string), value)
+			}
+		}
+		intr.bindings = bindings
+		// doesn't mutate value
+		return value, nil
+	case parsing.ASTLetExpression:
+		// save bindings state
+		bindings := intr.bindings
+		// retore bindings state
+		defer func() {
+			intr.bindings = bindings
+		}()
+		// evalute bindings first, then evaluate expression
+		if _, err := intr.Execute(node.Children[0], value); err != nil {
+			return nil, err
+		} else if value, err := intr.Execute(node.Children[1], value); err != nil {
+			return nil, err
+		} else {
+			return value, nil
+		}
+	case parsing.ASTVariable:
+		if value, err := intr.bindings.Get(node.Value.(string)); err != nil {
+			return nil, err
+		} else {
+			return value, nil
+		}
 	case parsing.ASTIndex:
 		if sliceType, ok := value.([]interface{}); ok {
 			index := node.Value.(int)

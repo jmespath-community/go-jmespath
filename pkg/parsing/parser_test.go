@@ -7,6 +7,150 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var parseLetExpressionsTest = []struct {
+	tokens      []token
+	prettyPrint string
+}{
+	{
+		[]token{
+			{tokenType: TOKVarref, value: "foo", position: 20, length: 3},
+			{tokenType: TOKEOF, position: 19},
+		},
+		`ASTVariable {
+  value: "foo"
+}
+`,
+	},
+	{
+		[]token{
+			{tokenType: TOKVarref, value: "foo", position: 4, length: 4},
+			{tokenType: TOKAssign, value: "=", position: 9, length: 1},
+			{tokenType: TOKUnquotedIdentifier, value: "foo", position: 11, length: 3},
+			{tokenType: TOKEOF, position: 19},
+		},
+		`ASTBinding {
+  children: {
+    ASTVariable {
+      value: "foo"
+    }
+    ASTField {
+      value: "foo"
+    }
+  }
+}
+`,
+	},
+	{
+		[]token{
+			// let $foo = foo in @
+			// 012345678901234567890123
+			//           1         2
+			{tokenType: TOKUnquotedIdentifier, value: "let", position: 0, length: 3},
+			{tokenType: TOKVarref, value: "foo", position: 4, length: 4},
+			{tokenType: TOKAssign, value: "=", position: 9, length: 1},
+			{tokenType: TOKUnquotedIdentifier, value: "foo", position: 11, length: 3},
+			{tokenType: TOKUnquotedIdentifier, value: "in", position: 15, length: 2},
+			{tokenType: TOKCurrent, value: "@", position: 18, length: 1},
+			{tokenType: TOKEOF, position: 19},
+		},
+		`ASTLetExpression {
+  children: {
+    ASTBindings {
+      children: {
+        ASTBinding {
+          children: {
+            ASTVariable {
+              value: "foo"
+            }
+            ASTField {
+              value: "foo"
+            }
+          }
+        }
+      }
+    }
+    ASTCurrentNode {
+    }
+  }
+}
+`,
+	},
+}
+
+func TestParsingLetExpression(t *testing.T) {
+	assert := assert.New(t)
+	p := NewParser()
+	for _, tt := range parseLetExpressionsTest {
+		parsed, _ := p.parseTokens(tt.tokens)
+		assert.Equal(tt.prettyPrint, parsed.PrettyPrint(0))
+	}
+}
+
+var parseLetExpressionsErrorsTest = []struct {
+	tokens []token
+	msg    string
+}{
+	{
+		[]token{
+			{tokenType: TOKUnquotedIdentifier, value: "let", position: 0, length: 3},
+			{tokenType: TOKVarref, value: "foo", position: 4, length: 4},
+			{tokenType: TOKAssign, value: "=", position: 9, length: 1},
+			{tokenType: TOKUnquotedIdentifier, value: "foo", position: 11, length: 3},
+			{tokenType: TOKUnquotedIdentifier, value: "in", position: 15, length: 2},
+			{tokenType: TOKEOF, position: 19},
+		},
+		"Incomplete expression",
+	},
+	{
+		[]token{
+			{tokenType: TOKUnquotedIdentifier, value: "let", position: 0, length: 3},
+			{tokenType: TOKVarref, value: "foo", position: 4, length: 4},
+			{tokenType: TOKAssign, value: "=", position: 9, length: 1},
+			{tokenType: TOKUnquotedIdentifier, value: "foo", position: 11, length: 3},
+			{tokenType: TOKUnquotedIdentifier, value: "of", position: 15, length: 2},
+			{tokenType: TOKEOF, position: 19},
+		},
+		"Invalid keyword 'of'",
+	},
+	{
+		[]token{
+			// let $foo = , foo in
+			//           ^
+			{tokenType: TOKUnquotedIdentifier, value: "let", position: 0, length: 3},
+			{tokenType: TOKVarref, value: "foo", position: 4, length: 4},
+			{tokenType: TOKAssign, value: "=", position: 9, length: 1},
+			{tokenType: TOKAssign, value: ",", position: 9, length: 1},
+			{tokenType: TOKUnquotedIdentifier, value: "foo", position: 11, length: 3},
+			{tokenType: TOKUnquotedIdentifier, value: "of", position: 15, length: 2},
+			{tokenType: TOKEOF, position: 19},
+		},
+		"Invalid comma-separated list",
+	},
+	{
+		[]token{
+			// let $foo = foo in {
+			//                    ^
+			{tokenType: TOKUnquotedIdentifier, value: "let", position: 0, length: 3},
+			{tokenType: TOKVarref, value: "foo", position: 4, length: 4},
+			{tokenType: TOKAssign, value: "=", position: 9, length: 1},
+			{tokenType: TOKUnquotedIdentifier, value: "foo", position: 11, length: 3},
+			{tokenType: TOKUnquotedIdentifier, value: "in", position: 15, length: 2},
+			{tokenType: TOKLbrace, value: "{", position: 17, length: 2},
+			{tokenType: TOKEOF, position: 19},
+		},
+		"Syntax error",
+	},
+}
+
+func TestParsingLetExpressionErrors(t *testing.T) {
+	assert := assert.New(t)
+	p := NewParser()
+	for _, tt := range parseLetExpressionsErrorsTest {
+		_, err := p.parseTokens(tt.tokens)
+		assert.NotNil(err, fmt.Sprintf("Expected parsing error: %s", tt.msg))
+	}
+}
+
 var parsingErrorTests = []struct {
 	expression string
 	msg        string
@@ -50,11 +194,14 @@ var prettyPrinted = `ASTProjection {
             ASTField {
               value: "baz"
             }
+          }
         }
         ASTField {
           value: "qux"
         }
+      }
     }
+  }
 }
 `
 
@@ -74,7 +221,9 @@ var prettyPrintedCompNode = `ASTFilterProjection {
         ASTField {
           value: "c"
         }
+      }
     }
+  }
 }
 `
 
