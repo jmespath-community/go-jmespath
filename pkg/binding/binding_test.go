@@ -5,138 +5,76 @@ import (
 	"testing"
 )
 
-func TestNewBindings(t *testing.T) {
+func TestNewBinding(t *testing.T) {
 	tests := []struct {
-		name string
-		want Bindings
+		name  string
+		value interface{}
+		want  Binding
 	}{{
-		want: bindings{},
+		name:  "nil",
+		value: nil,
+		want:  &binding{nil},
+	}, {
+		name:  "int",
+		value: int(42),
+		want:  &binding{int(42)},
+	}, {
+		name:  "string",
+		value: "42",
+		want:  &binding{"42"},
+	}, {
+		name:  "array",
+		value: []interface{}{"42", 42},
+		want:  &binding{[]interface{}{"42", 42}},
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewBindings(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewBindings() = %v, want %v", got, tt.want)
+			if got := NewBinding(tt.value); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewBinding() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_bindings_Get(t *testing.T) {
-	type fields struct {
-		values map[string]interface{}
-	}
-	type args struct {
-		name string
-	}
+func Test_binding_Value(t *testing.T) {
 	tests := []struct {
 		name    string
-		fields  fields
-		args    args
+		value   interface{}
 		want    interface{}
 		wantErr bool
 	}{{
-		fields: fields{
-			values: nil,
-		},
-		args: args{
-			name: "$root",
-		},
-		wantErr: true,
+		name:    "nil",
+		value:   nil,
+		want:    nil,
+		wantErr: false,
 	}, {
-		fields: fields{
-			values: map[string]interface{}{},
-		},
-		args: args{
-			name: "$root",
-		},
-		wantErr: true,
+		name:    "int",
+		value:   int(42),
+		want:    int(42),
+		wantErr: false,
 	}, {
-		fields: fields{
-			values: map[string]interface{}{
-				"$root": 42.0,
-			},
-		},
-		args: args{
-			name: "$root",
-		},
-		want: 42.0,
+		name:    "string",
+		value:   "42",
+		want:    "42",
+		wantErr: false,
 	}, {
-		fields: fields{
-			values: map[string]interface{}{
-				"$foot": 42.0,
-			},
-		},
-		args: args{
-			name: "$root",
-		},
-		wantErr: true,
+		name:    "array",
+		value:   []interface{}{"42", 42},
+		want:    []interface{}{"42", 42},
+		wantErr: false,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			b := bindings{
-				values: tt.fields.values,
+			b := &binding{
+				value: tt.value,
 			}
-			got, err := b.Get(tt.args.name)
+			got, err := b.Value()
 			if (err != nil) != tt.wantErr {
-				t.Errorf("bindings.Get() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("binding.Value() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("bindings.Get() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func Test_bindings_Register(t *testing.T) {
-	type fields struct {
-		values map[string]interface{}
-	}
-	type args struct {
-		name  string
-		value interface{}
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
-		want   Bindings
-	}{{
-		fields: fields{
-			values: nil,
-		},
-		args: args{
-			name:  "$root",
-			value: 42.0,
-		},
-		want: bindings{
-			values: map[string]interface{}{
-				"$root": 42.0,
-			},
-		},
-	}, {
-		fields: fields{
-			values: map[string]interface{}{
-				"$root": 21.0,
-			},
-		},
-		args: args{
-			name:  "$root",
-			value: 42.0,
-		},
-		want: bindings{
-			values: map[string]interface{}{
-				"$root": 42.0,
-			},
-		},
-	}}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			b := bindings{
-				values: tt.fields.values,
-			}
-			if got := b.Register(tt.args.name, tt.args.value); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("bindings.Register() = %v, want %v", got, tt.want)
+				t.Errorf("binding.Value() = %v, want %v", got, tt.want)
 			}
 		})
 	}

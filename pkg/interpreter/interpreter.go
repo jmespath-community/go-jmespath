@@ -223,7 +223,7 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 			if value, err := intr.Execute(child.Children[1], value); err != nil {
 				return nil, err
 			} else {
-				bindings = bindings.Register(child.Children[0].Value.(string), value)
+				bindings = bindings.Register(child.Children[0].Value.(string), binding.NewBinding(value))
 			}
 		}
 		intr.bindings = bindings
@@ -245,7 +245,7 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 			return value, nil
 		}
 	case parsing.ASTVariable:
-		if value, err := intr.bindings.Get(node.Value.(string)); err != nil {
+		if value, err := binding.Resolve(node.Value.(string), intr.bindings); err != nil {
 			return nil, err
 		} else {
 			return value, nil
