@@ -704,8 +704,14 @@ func jpfToString(arguments []interface{}) (interface{}, error) {
 
 func jpfToNumber(arguments []interface{}) (interface{}, error) {
 	arg := arguments[0]
-	if v, ok := arg.(float64); ok {
-		return v, nil
+	if arg == nil {
+		return nil, nil
+	}
+	if arg == true || arg == false {
+		return nil, nil
+	}
+	if value, ok := util.ToNumber(arg); ok {
+		return value, nil
 	}
 	if v, ok := arg.(string); ok {
 		conv, err := strconv.ParseFloat(v, 64)
@@ -718,12 +724,6 @@ func jpfToNumber(arguments []interface{}) (interface{}, error) {
 		return nil, nil
 	}
 	if _, ok := arg.(map[string]interface{}); ok {
-		return nil, nil
-	}
-	if arg == nil {
-		return nil, nil
-	}
-	if arg == true || arg == false {
 		return nil, nil
 	}
 	return nil, errors.New("unknown type")
