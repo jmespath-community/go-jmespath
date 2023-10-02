@@ -224,6 +224,21 @@ func ToInteger(v interface{}) (int, bool) {
 	return 0, false
 }
 
+// ToNumber converts a numeric interface to a float64.
+func ToNumber(v interface{}) (float64, bool) {
+	value := reflect.ValueOf(v)
+	if value.CanFloat() {
+		return value.Float(), true
+	}
+	if value.CanInt() {
+		return float64(value.Int()), true
+	}
+	if value.CanUint() {
+		return float64(value.Uint()), true
+	}
+	return 0, false
+}
+
 func ToPositiveInteger(v interface{}) (int, bool) {
 	num, ok := ToInteger(v)
 	return num, ok && num >= 0

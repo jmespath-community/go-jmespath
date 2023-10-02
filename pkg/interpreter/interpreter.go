@@ -48,7 +48,7 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 		if err != nil {
 			return nil, err
 		}
-		num, ok := expr.(float64)
+		num, ok := util.ToNumber(expr)
 		if !ok {
 			return nil, nil
 		}
@@ -67,11 +67,11 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 		if err != nil {
 			return nil, err
 		}
-		leftNum, ok := left.(float64)
+		leftNum, ok := util.ToNumber(left)
 		if !ok {
 			return nil, nil
 		}
-		rightNum, ok := right.(float64)
+		rightNum, ok := util.ToNumber(right)
 		if !ok {
 			return nil, nil
 		}
@@ -106,11 +106,11 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}) (i
 		case parsing.TOKNE:
 			return !util.ObjsEqual(left, right), nil
 		}
-		leftNum, ok := left.(float64)
+		leftNum, ok := util.ToNumber(left)
 		if !ok {
 			return nil, nil
 		}
-		rightNum, ok := right.(float64)
+		rightNum, ok := util.ToNumber(right)
 		if !ok {
 			return nil, nil
 		}
