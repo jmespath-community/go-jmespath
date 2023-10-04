@@ -24,7 +24,7 @@ func TestResolve(t *testing.T) {
 		want:    nil,
 		wantErr: true,
 	}, {
-		name: "enmpty",
+		name: "empty",
 		args: args{
 			name:     "",
 			bindings: NewBindings().Register("$test", NewBinding(42)),
