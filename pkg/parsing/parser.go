@@ -218,8 +218,7 @@ func (p *Parser) parseSliceExpression() (ASTNode, error) {
 			parts[index] = &parsedInt
 			p.advance()
 		} else {
-			return ASTNode{}, p.syntaxError(
-				"Expected tColon or tNumber" + ", received: " + p.current().String())
+			return ASTNode{}, p.syntaxError("Expected tColon or tNumber, received: " + p.current().String())
 		}
 		current = p.current()
 	}
@@ -241,7 +240,7 @@ func (p *Parser) matchKeyword(keyword string) error {
 		p.advance()
 		return nil
 	}
-	return p.syntaxError("Expected keyword " + keyword + ", received: " + p.current().String())
+	return p.syntaxError(fmt.Sprintf("Expected keyword %s, received: ", keyword) + p.current().String())
 }
 
 func (p *Parser) match(tokenType TokType) error {
@@ -249,7 +248,7 @@ func (p *Parser) match(tokenType TokType) error {
 		p.advance()
 		return nil
 	}
-	return p.syntaxError("Expected " + tokenType.String() + ", received: " + p.current().String())
+	return p.syntaxError(fmt.Sprintf("Expected %s, received: ", tokenType.String()) + p.current().String())
 }
 
 func (p *Parser) led(tokenType TokType, node ASTNode) (ASTNode, error) {

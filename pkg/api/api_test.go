@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/jmespath-community/go-jmespath/pkg/functions"
+	"github.com/jmespath-community/go-jmespath/pkg/interpreter"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -142,7 +143,15 @@ func TestSearch(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			assert := assert.New(t)
-			got, err := Search(tt.args.expression, tt.args.data, tt.args.funcs...)
+			var opts []interpreter.Option
+			if len(tt.args.funcs) != 0 {
+				var f []functions.FunctionEntry
+				f = append(f, functions.GetDefaultFunctions()...)
+				f = append(f, tt.args.funcs...)
+				caller := interpreter.NewFunctionCaller(f...)
+				opts = append(opts, interpreter.WithFunctionCaller(caller))
+			}
+			got, err := Search(tt.args.expression, tt.args.data, opts...)
 			assert.Equal(tt.wantErr, err != nil)
 			assert.Equal(tt.want, got)
 		})
