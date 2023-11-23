@@ -3,6 +3,7 @@ package jmespath
 import (
 	"github.com/jmespath-community/go-jmespath/pkg/api"
 	"github.com/jmespath-community/go-jmespath/pkg/functions"
+	"github.com/jmespath-community/go-jmespath/pkg/interpreter"
 	"github.com/jmespath-community/go-jmespath/pkg/parsing"
 )
 
@@ -15,6 +16,12 @@ var (
 	MustCompile = api.MustCompile
 	Search      = api.Search
 )
+
+// interpreter types
+
+type Option = interpreter.Option
+
+var WithFunctionCaller = interpreter.WithFunctionCaller
 
 // parsing types
 
