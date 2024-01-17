@@ -139,6 +139,12 @@ func TestSearch(t *testing.T) {
 			},
 		},
 		want: 42.0,
+	}, {
+		args: args{
+			expression: "contains(@, { foo: 'bar' })",
+			data:       []interface{}{map[string]any{}, nil, map[string]any{"foo": "bar"}},
+		},
+		want: true,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
