@@ -155,14 +155,18 @@ func (intr *treeInterpreter) execute(node parsing.ASTNode, value interface{}, fu
 		return functionCaller.CallFunction(node.Value.(string), resolvedArgs)
 	case parsing.ASTField:
 		key := node.Value.(string)
-		var result interface{}
+		var result any
 		if m, ok := value.(map[string]interface{}); ok {
 			result = m[key]
 			if result != nil {
 				return result, nil
 			}
 		}
-		result = intr.fieldFromStruct(node.Value.(string), value)
+		result = intr.fieldFromStruct(key, value)
+		if result != nil {
+			return result, nil
+		}
+		result = intr.fieldFromMap(node.Value, value)
 		if result != nil {
 			return result, nil
 		}
@@ -483,6 +487,21 @@ func (intr *treeInterpreter) fieldFromStruct(key string, value interface{}) inte
 			return nil
 		}
 		return v.Interface()
+	}
+	return nil
+}
+
+func (intr *treeInterpreter) fieldFromMap(key any, value any) any {
+	rv := reflect.ValueOf(value)
+	if rv.Kind() == reflect.Map {
+		keyType := reflect.TypeOf(value).Key()
+		if reflect.TypeOf(key).ConvertibleTo(keyType) {
+			key := reflect.ValueOf(key)
+			value := rv.MapIndex(key.Convert(keyType))
+			if value.IsValid() {
+				return value.Interface()
+			}
+		}
 	}
 	return nil
 }

@@ -50,6 +50,8 @@ func jpfEcho(arguments []interface{}) (interface{}, error) {
 }
 
 func TestSearch(t *testing.T) {
+	type Label string
+
 	type args struct {
 		expression string
 		data       interface{}
@@ -145,6 +147,22 @@ func TestSearch(t *testing.T) {
 			data:       []interface{}{map[string]any{}, nil, map[string]any{"foo": "bar"}},
 		},
 		want: true,
+	}, {
+		args: args{
+			expression: "length(@[?metric.__name__ == 'foo'])",
+			data: []struct {
+				Metric map[Label]any
+			}{{
+				Metric: map[Label]any{
+					"__name__": "foo",
+				},
+			}, {
+				Metric: map[Label]any{
+					"__name__": "bar",
+				},
+			}},
+		},
+		want: 1.0,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
