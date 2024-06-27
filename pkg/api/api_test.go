@@ -163,6 +163,22 @@ func TestSearch(t *testing.T) {
 			}},
 		},
 		want: 1.0,
+	}, {
+		args: args{
+			expression: "length(@[?metric.__name__ == 'foo'])",
+			data: []struct {
+				Metric map[string]string
+			}{{
+				Metric: map[string]string{
+					"__name__": "foo",
+				},
+			}, {
+				Metric: map[string]string{
+					"__name__": "bar",
+				},
+			}},
+		},
+		want: 1.0,
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
