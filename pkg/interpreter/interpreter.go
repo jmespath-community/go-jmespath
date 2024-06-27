@@ -149,6 +149,7 @@ func (intr *treeInterpreter) execute(node parsing.ASTNode, value interface{}, fu
 				}
 			}
 		}
+		// TODO: don't we want to return an error here ?
 		return nil, nil
 	case parsing.ASTExpRef:
 		return func(data interface{}) (interface{}, error) {
