@@ -43,13 +43,13 @@ func NewInterpreter(data interface{}, bindings binding.Bindings) Interpreter {
 // It will produce the result of applying the JMESPath expression associated
 // with the ASTNode to the input data "value".
 func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}, opts ...Option) (interface{}, error) {
-	var o options
+	var o Options
 	for _, opt := range opts {
 		if opt != nil {
 			o = opt(o)
 		}
 	}
-	functionCaller := o.functionCaller
+	functionCaller := o.FunctionCaller
 	if functionCaller == nil {
 		functionCaller = DefaultFunctionCaller
 	}
