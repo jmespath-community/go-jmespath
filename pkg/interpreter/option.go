@@ -1,14 +1,14 @@
 package interpreter
 
-type Option func(options) options
+type Option func(Options) Options
 
-type options struct {
-	functionCaller FunctionCaller
+type Options struct {
+	FunctionCaller FunctionCaller
 }
 
 func WithFunctionCaller(functionCaller FunctionCaller) Option {
-	return func(o options) options {
-		o.functionCaller = functionCaller
+	return func(o Options) Options {
+		o.FunctionCaller = functionCaller
 		return o
 	}
 }
