@@ -35,9 +35,10 @@ const (
 )
 
 type FunctionEntry struct {
-	Name      string
-	Arguments []ArgSpec
-	Handler   JpFunction
+	Name        string
+	Arguments   []ArgSpec
+	Handler     JpFunction
+	Description string
 }
 
 type ArgSpec struct {
