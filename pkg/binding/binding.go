@@ -15,8 +15,18 @@ func (b *binding) Value() (any, error) {
 	return b.value, nil
 }
 
-func NewBinding(value any) Binding {
+func NewBinding(value any) *binding {
 	return &binding{
 		value: value,
 	}
+}
+
+type delegate func() (any, error)
+
+func (b delegate) Value() (any, error) {
+	return b()
+}
+
+func NewDelegate(delegate func() (any, error)) delegate {
+	return delegate
 }

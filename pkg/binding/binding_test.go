@@ -1,15 +1,16 @@
 package binding
 
 import (
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestNewBinding(t *testing.T) {
 	tests := []struct {
 		name  string
 		value any
-		want  Binding
+		want  *binding
 	}{{
 		name:  "nil",
 		value: nil,
@@ -29,9 +30,8 @@ func TestNewBinding(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewBinding(tt.value); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewBinding() = %v, want %v", got, tt.want)
-			}
+			got := NewBinding(tt.value)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -65,16 +65,56 @@ func Test_binding_Value(t *testing.T) {
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			b := &binding{
-				value: tt.value,
+			subj := NewBinding(tt.value)
+			got, err := subj.Value()
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.want, got)
 			}
-			got, err := b.Value()
-			if (err != nil) != tt.wantErr {
-				t.Errorf("binding.Value() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("binding.Value() = %v, want %v", got, tt.want)
+		})
+	}
+}
+
+func Test_delegate_Value(t *testing.T) {
+	tests := []struct {
+		name    string
+		value   any
+		want    any
+		wantErr bool
+	}{{
+		name:    "nil",
+		value:   nil,
+		want:    nil,
+		wantErr: false,
+	}, {
+		name:    "int",
+		value:   int(42),
+		want:    int(42),
+		wantErr: false,
+	}, {
+		name:    "string",
+		value:   "42",
+		want:    "42",
+		wantErr: false,
+	}, {
+		name:    "array",
+		value:   []any{"42", 42},
+		want:    []any{"42", 42},
+		wantErr: false,
+	}}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			subj := NewDelegate(func() (any, error) {
+				return tt.value, nil
+			})
+			got, err := subj.Value()
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.want, got)
 			}
 		})
 	}
