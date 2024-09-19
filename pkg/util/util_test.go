@@ -8,7 +8,7 @@ import (
 
 func TestSlicePositiveStep(t *testing.T) {
 	assert := assert.New(t)
-	input := make([]interface{}, 5)
+	input := make([]any, 5)
 	input[0] = 0
 	input[1] = 1
 	input[2] = 2
@@ -23,9 +23,9 @@ func TestIsFalseJSONTypes(t *testing.T) {
 	assert := assert.New(t)
 	assert.True(IsFalse(false))
 	assert.True(IsFalse(""))
-	var empty []interface{}
+	var empty []any
 	assert.True(IsFalse(empty))
-	m := make(map[string]interface{})
+	m := make(map[string]any)
 	assert.True(IsFalse(m))
 	assert.True(IsFalse(nil))
 }
@@ -46,7 +46,7 @@ func TestIsFalseWithUserDefinedStructs(t *testing.T) {
 func TestIsFalseWithNilInterface(t *testing.T) {
 	assert := assert.New(t)
 	var a *int
-	var nilInterface interface{} = a
+	var nilInterface any = a
 	assert.True(IsFalse(nilInterface))
 }
 
@@ -74,7 +74,7 @@ func TestObjsEqual(t *testing.T) {
 func TestToNumber(t *testing.T) {
 	tests := []struct {
 		name   string
-		value  interface{}
+		value  any
 		want   float64
 		wantOk bool
 	}{{

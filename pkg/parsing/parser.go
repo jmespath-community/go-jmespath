@@ -46,7 +46,7 @@ const (
 // ASTNode represents the abstract syntax tree of a JMESPath expression.
 type ASTNode struct {
 	NodeType astNodeType
-	Value    interface{}
+	Value    any
 	Children []ASTNode
 }
 
@@ -360,7 +360,7 @@ func (p *Parser) nud(token token) (ASTNode, error) {
 			Value:    token.value,
 		}, nil
 	case TOKJSONLiteral:
-		var parsed interface{}
+		var parsed any
 		err := json.Unmarshal([]byte(token.value), &parsed)
 		if err != nil {
 			return ASTNode{}, err

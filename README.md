@@ -18,7 +18,7 @@ you use, `jmespath.Search`:
 > import "github.com/jmespath-community/go-jmespath"
 >
 > var jsondata = []byte(`{"foo": {"bar": {"baz": [0, 1, 2, 3, 4]}}}`) // your data
-> var data interface{}
+> var data any
 > err := json.Unmarshal(jsondata, &data)
 > result, err := jmespath.Search("foo.bar.baz[2]", data)
 result = 2
@@ -34,7 +34,7 @@ from a list.  Here are a few more examples:
 
 ```go
 > var jsondata = []byte(`{"foo": {"bar": {"baz": [0, 1, 2, 3, 4]}}}`) // your data
-> var data interface{}
+> var data any
 > err := json.Unmarshal(jsondata, &data)
 > result, err := jmespath.Search("foo.bar", data)
 result = { "baz": [ 0, 1, 2, 3, 4 ] }
@@ -42,7 +42,7 @@ result = { "baz": [ 0, 1, 2, 3, 4 ] }
 
 > var jsondata  = []byte(`{"foo": [{"first": "a", "last": "b"},
                            {"first": "c", "last": "d"}]}`) // your data
-> var data interface{}
+> var data any
 > err := json.Unmarshal(jsondata, &data)
 > result, err := jmespath.Search({"foo[*].first", data)
 result [ 'a', 'c' ]
@@ -51,7 +51,7 @@ result [ 'a', 'c' ]
 > var jsondata = []byte(`{"foo": [{"age": 20}, {"age": 25},
                            {"age": 30}, {"age": 35},
                            {"age": 40}]}`) // your data
-> var data interface{}
+> var data any
 > err := json.Unmarshal(jsondata, &data)
 > result, err := jmespath.Search("foo[?age > `30`]")
 result = [ { age: 35 }, { age: 40 } ]
@@ -62,7 +62,7 @@ you are going to run multiple searches with it:
 
 ```go
 > var jsondata = []byte(`{"foo": "bar"}`)
-> var data interface{}
+> var data any
 > err := json.Unmarshal(jsondata, &data)
 > precompiled, err := Compile("foo")
 > if err != nil{

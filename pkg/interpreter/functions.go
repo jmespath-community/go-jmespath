@@ -10,7 +10,7 @@ import (
 )
 
 type FunctionCaller interface {
-	CallFunction(string, []interface{}) (interface{}, error)
+	CallFunction(string, []any) (any, error)
 }
 
 type functionEntry struct {
@@ -35,7 +35,7 @@ func NewFunctionCaller(funcs ...functions.FunctionEntry) *functionCaller {
 	}
 }
 
-func resolveArgs(name string, function functionEntry, arguments []interface{}) ([]interface{}, error) {
+func resolveArgs(name string, function functionEntry, arguments []any) ([]any, error) {
 	if len(function.arguments) == 0 {
 		return arguments, nil
 	}
@@ -102,7 +102,7 @@ func getMaxExpected(arguments []functions.ArgSpec) (int, bool) {
 	return len(arguments), true
 }
 
-func typeCheck(a functions.ArgSpec, arg interface{}) error {
+func typeCheck(a functions.ArgSpec, arg any) error {
 	for _, t := range a.Types {
 		switch t {
 		case functions.JpNumber:
@@ -118,12 +118,12 @@ func typeCheck(a functions.ArgSpec, arg interface{}) error {
 				return nil
 			}
 		case functions.JpObject:
-			if _, ok := arg.(map[string]interface{}); ok {
+			if _, ok := arg.(map[string]any); ok {
 				return nil
 			}
 		case functions.JpArrayArray:
 			if util.IsSliceType(arg) {
-				if _, ok := arg.([]interface{}); ok {
+				if _, ok := arg.([]any); ok {
 					return nil
 				}
 			}
@@ -146,7 +146,7 @@ func typeCheck(a functions.ArgSpec, arg interface{}) error {
 	return fmt.Errorf("invalid type for: %v, expected: %#v", arg, a.Types)
 }
 
-func (f *functionCaller) CallFunction(name string, arguments []interface{}) (interface{}, error) {
+func (f *functionCaller) CallFunction(name string, arguments []any) (any, error) {
 	entry, ok := f.functionTable[name]
 	if !ok {
 		return nil, errors.New("unknown function: " + name)

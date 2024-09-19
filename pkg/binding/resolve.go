@@ -4,7 +4,7 @@ import (
 	"errors"
 )
 
-func Resolve(name string, bindings Bindings) (interface{}, error) {
+func Resolve(name string, bindings Bindings) (any, error) {
 	if bindings == nil {
 		return nil, errors.New("bindings must not be nil")
 	}

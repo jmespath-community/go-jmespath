@@ -80,7 +80,7 @@ func (c command) run(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("error reading from stdin: %w", err)
 		}
 	}
-	var data interface{}
+	var data any
 	if err := json.Unmarshal(inputData, &data); err != nil {
 		return fmt.Errorf("invalid input JSON: %w", err)
 	}

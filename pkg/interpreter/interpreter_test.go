@@ -43,7 +43,7 @@ type nestedSlice struct {
 	A []sliceType
 }
 
-func search(t *testing.T, expression string, data interface{}) (interface{}, error) {
+func search(t *testing.T, expression string, data any) (any, error) {
 	t.Helper()
 	parser := parsing.NewParser()
 	ast, err := parser.Parse(expression)
@@ -56,7 +56,7 @@ func search(t *testing.T, expression string, data interface{}) (interface{}, err
 
 func TestCanSupportEmptyInterface(t *testing.T) {
 	assert := assert.New(t)
-	data := make(map[string]interface{})
+	data := make(map[string]any)
 	data["foo"] = "bar"
 	result, err := search(t, "foo", data)
 	assert.Nil(err)
@@ -84,7 +84,7 @@ func TestCanSupportStructWithSliceAll(t *testing.T) {
 	data := sliceType{A: "foo", B: []scalars{{"f1", "b1"}, {"correct", "b2"}}}
 	result, err := search(t, "B[].Foo", data)
 	assert.Nil(err)
-	assert.Equal([]interface{}{"f1", "correct"}, result)
+	assert.Equal([]any{"f1", "correct"}, result)
 }
 
 func TestCanSupportStructWithSlicingExpression(t *testing.T) {
@@ -92,7 +92,7 @@ func TestCanSupportStructWithSlicingExpression(t *testing.T) {
 	data := sliceType{A: "foo", B: []scalars{{"f1", "b1"}, {"correct", "b2"}}}
 	result, err := search(t, "B[:].Foo", data)
 	assert.Nil(err)
-	assert.Equal([]interface{}{"f1", "correct"}, result)
+	assert.Equal([]any{"f1", "correct"}, result)
 }
 
 func TestCanSupportStructWithFilterProjection(t *testing.T) {
@@ -100,7 +100,7 @@ func TestCanSupportStructWithFilterProjection(t *testing.T) {
 	data := sliceType{A: "foo", B: []scalars{{"f1", "b1"}, {"correct", "b2"}}}
 	result, err := search(t, "B[? `true` ].Foo", data)
 	assert.Nil(err)
-	assert.Equal([]interface{}{"f1", "correct"}, result)
+	assert.Equal([]any{"f1", "correct"}, result)
 }
 
 func TestCanSupportStructWithSlice(t *testing.T) {
@@ -162,7 +162,7 @@ func TestCanSupportFlattenNestedSlice(t *testing.T) {
 	}}
 	result, err := search(t, "A[].B[].Foo", data)
 	assert.Nil(err)
-	assert.Equal([]interface{}{"f1a", "f1b", "f2a", "f2b"}, result)
+	assert.Equal([]any{"f1a", "f1b", "f2a", "f2b"}, result)
 }
 
 func TestCanSupportFlattenNestedEmptySlice(t *testing.T) {
@@ -172,7 +172,7 @@ func TestCanSupportFlattenNestedEmptySlice(t *testing.T) {
 	}}
 	result, err := search(t, "A[].B[].Foo", data)
 	assert.Nil(err)
-	assert.Equal([]interface{}{"a"}, result)
+	assert.Equal([]any{"a"}, result)
 }
 
 func TestCanSupportProjectionsWithStructs(t *testing.T) {
@@ -182,7 +182,7 @@ func TestCanSupportProjectionsWithStructs(t *testing.T) {
 	}}
 	result, err := search(t, "A[*].A", data)
 	assert.Nil(err)
-	assert.Equal([]interface{}{"first", "second", "third"}, result)
+	assert.Equal([]any{"first", "second", "third"}, result)
 }
 
 func TestCanSupportSliceOfStructsWithFunctions(t *testing.T) {
@@ -230,7 +230,7 @@ func BenchmarkInterpretNestedStruct(b *testing.B) {
 func BenchmarkInterpretNestedMaps(b *testing.B) {
 	assert := assert.New(b)
 	jsonData := []byte(`{"fooasdfasdfasdfasdf": {"fooasdfasdfasdfasdf": {"fooasdfasdfasdfasdf": {"fooasdfasdfasdfasdf": "foobarbazqux"}}}}`)
-	var data interface{}
+	var data any
 	err := json.Unmarshal(jsonData, &data)
 	assert.Nil(err)
 	intr := NewInterpreter(nil, nil)
