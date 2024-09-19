@@ -13,13 +13,13 @@ import (
 // - An empty string array, or hash.
 // - The boolean value false.
 // - nil.
-func IsFalse(value interface{}) bool {
+func IsFalse(value any) bool {
 	switch v := value.(type) {
 	case bool:
 		return !v
-	case []interface{}:
+	case []any:
 		return len(v) == 0
-	case map[string]interface{}:
+	case map[string]any:
 		return len(v) == 0
 	case string:
 		return len(v) == 0
@@ -50,7 +50,7 @@ func IsFalse(value interface{}) bool {
 // ObjsEqual is a generic object equality check.
 // It will take two arbitrary objects and recursively determine
 // if they are equal.
-func ObjsEqual(left interface{}, right interface{}) bool {
+func ObjsEqual(left any, right any) bool {
 	return reflect.DeepEqual(left, right)
 }
 
@@ -63,7 +63,7 @@ type SliceParam struct {
 }
 
 // Slice supports [start:stop:step] style slicing that's supported in JMESPath.
-func Slice[T interface{} | rune](slice []T, parts []SliceParam) ([]T, error) {
+func Slice[T any | rune](slice []T, parts []SliceParam) ([]T, error) {
 	computed, err := computeSliceParams(len(slice), parts)
 	if err != nil {
 		return nil, err
@@ -154,14 +154,14 @@ func capSlice(length int, actual int, step int) int {
 // ToArrayArray converts an empty interface type to a slice of slices.
 // If any element in the array cannot be converted, then nil is returned
 // along with a second value of false.
-func ToArrayArray(data interface{}) ([][]interface{}, bool) {
-	result := [][]interface{}{}
-	arr, ok := data.([]interface{})
+func ToArrayArray(data any) ([][]any, bool) {
+	result := [][]any{}
+	arr, ok := data.([]any)
 	if !ok {
 		return nil, false
 	}
 	for _, item := range arr {
-		nested, ok := item.([]interface{})
+		nested, ok := item.([]any)
 		if !ok {
 			return nil, false
 		}
@@ -173,9 +173,9 @@ func ToArrayArray(data interface{}) ([][]interface{}, bool) {
 // ToArrayNum converts an empty interface type to a slice of float64.
 // If any element in the array cannot be converted, then nil is returned
 // along with a second value of false.
-func ToArrayNum(data interface{}) ([]float64, bool) {
+func ToArrayNum(data any) ([]float64, bool) {
 	// Is there a better way to do this with reflect?
-	if d, ok := data.([]interface{}); ok {
+	if d, ok := data.([]any); ok {
 		result := make([]float64, len(d))
 		for i, el := range d {
 			item, ok := el.(float64)
@@ -194,9 +194,9 @@ func ToArrayNum(data interface{}) ([]float64, bool) {
 // along with a second value of false.  If the input data could be entirely
 // converted, then the converted data, along with a second value of true,
 // will be returned.
-func ToArrayStr(data interface{}) ([]string, bool) {
+func ToArrayStr(data any) ([]string, bool) {
 	// Is there a better way to do this with reflect?
-	if d, ok := data.([]interface{}); ok {
+	if d, ok := data.([]any); ok {
 		result := make([]string, len(d))
 		for i, el := range d {
 			item, ok := el.(string)
@@ -214,7 +214,7 @@ func ToArrayStr(data interface{}) ([]string, bool) {
 // It expects the empty interface to represent a float64 JSON number.
 // If the empty interface cannot be converted or if the number
 // is not an integer, the function returns a second boolean value false.
-func ToInteger(v interface{}) (int, bool) {
+func ToInteger(v any) (int, bool) {
 	if num, ok := v.(float64); ok {
 		if math.Floor(num) != num {
 			return 0, false
@@ -225,7 +225,7 @@ func ToInteger(v interface{}) (int, bool) {
 }
 
 // ToNumber converts a numeric interface to a float64.
-func ToNumber(v interface{}) (float64, bool) {
+func ToNumber(v any) (float64, bool) {
 	value := reflect.ValueOf(v)
 	if value.CanFloat() {
 		return value.Float(), true
@@ -239,12 +239,12 @@ func ToNumber(v interface{}) (float64, bool) {
 	return 0, false
 }
 
-func ToPositiveInteger(v interface{}) (int, bool) {
+func ToPositiveInteger(v any) (int, bool) {
 	num, ok := ToInteger(v)
 	return num, ok && num >= 0
 }
 
-func IsSliceType(v interface{}) bool {
+func IsSliceType(v any) bool {
 	if v == nil {
 		return false
 	}

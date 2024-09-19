@@ -12,7 +12,7 @@ import (
 func TestValidUncompiledExpressionSearches(t *testing.T) {
 	assert := assert.New(t)
 	j := []byte(`{"foo": {"bar": {"baz": [0, 1, 2, 3, 4]}}}`)
-	var d interface{}
+	var d any
 	err := json.Unmarshal(j, &d)
 	assert.Nil(err)
 	result, err := Search("foo.bar.baz[2]", d)
@@ -22,7 +22,7 @@ func TestValidUncompiledExpressionSearches(t *testing.T) {
 
 func TestValidPrecompiledExpressionSearches(t *testing.T) {
 	assert := assert.New(t)
-	data := make(map[string]interface{})
+	data := make(map[string]any)
 	data["foo"] = "bar"
 	precompiled, err := Compile("foo")
 	assert.Nil(err)
@@ -45,7 +45,7 @@ func TestInvalidMustCompilePanics(t *testing.T) {
 	MustCompile("not a valid expression")
 }
 
-func jpfEcho(arguments []interface{}) (interface{}, error) {
+func jpfEcho(arguments []any) (any, error) {
 	return arguments[0], nil
 }
 
@@ -54,13 +54,13 @@ func TestSearch(t *testing.T) {
 
 	type args struct {
 		expression string
-		data       interface{}
+		data       any
 		funcs      []functions.FunctionEntry
 	}
 	tests := []struct {
 		name    string
 		args    args
-		want    interface{}
+		want    any
 		wantErr bool
 	}{{
 		args: args{
@@ -70,13 +70,13 @@ func TestSearch(t *testing.T) {
 	}, {
 		args: args{
 			expression: "sort_by(@, &@ *`-1.0`)",
-			data:       []interface{}{1.0, 2.0, 3.0, 4.0, 5.0},
+			data:       []any{1.0, 2.0, 3.0, 4.0, 5.0},
 		},
-		want: []interface{}{5.0, 4.0, 3.0, 2.0, 1.0},
+		want: []any{5.0, 4.0, 3.0, 2.0, 1.0},
 	}, {
 		args: args{
 			expression: "echo(@)",
-			data:       []interface{}{1.0, 2.0, 3.0, 4.0, 5.0},
+			data:       []any{1.0, 2.0, 3.0, 4.0, 5.0},
 			funcs: []functions.FunctionEntry{{
 				Name:    "echo",
 				Handler: jpfEcho,
@@ -85,7 +85,7 @@ func TestSearch(t *testing.T) {
 				},
 			}},
 		},
-		want: []interface{}{1.0, 2.0, 3.0, 4.0, 5.0},
+		want: []any{1.0, 2.0, 3.0, 4.0, 5.0},
 	}, {
 		args: args{
 			expression: "echo(@)",
@@ -121,7 +121,7 @@ func TestSearch(t *testing.T) {
 	}, {
 		args: args{
 			expression: `@."$".a`,
-			data: map[string]interface{}{
+			data: map[string]any{
 				"a": 42.0,
 			},
 		},
@@ -130,13 +130,13 @@ func TestSearch(t *testing.T) {
 		args: args{
 			expression: "`null` | {foo: @}",
 		},
-		want: map[string]interface{}{
+		want: map[string]any{
 			"foo": nil,
 		},
 	}, {
 		args: args{
 			expression: "let $root = @ in $root.a",
-			data: map[string]interface{}{
+			data: map[string]any{
 				"a": 42.0,
 			},
 		},
@@ -144,7 +144,7 @@ func TestSearch(t *testing.T) {
 	}, {
 		args: args{
 			expression: "contains(@, { foo: 'bar' })",
-			data:       []interface{}{map[string]any{}, nil, map[string]any{"foo": "bar"}},
+			data:       []any{map[string]any{}, nil, map[string]any{"foo": "bar"}},
 		},
 		want: true,
 	}, {

@@ -13,7 +13,7 @@ import (
 )
 
 type TestSuite struct {
-	Given     interface{}
+	Given     any
 	TestCases []TestCase `json:"cases"`
 	Comment   string
 }
@@ -21,7 +21,7 @@ type TestSuite struct {
 type TestCase struct {
 	Comment    string
 	Expression string
-	Result     interface{}
+	Result     any
 	Error      string
 }
 
@@ -80,7 +80,7 @@ func runTestSuite(assert *assert.Assertions, testsuite TestSuite, filename strin
 	}
 }
 
-func runSyntaxTestCase(assert *assert.Assertions, given interface{}, testcase TestCase, filename string) {
+func runSyntaxTestCase(assert *assert.Assertions, given any, testcase TestCase, filename string) {
 	// Anything with an .Error means that we expect that JMESPath should return
 	// an error when we try to evaluate the expression.
 	// fmt.Println(fmt.Sprintf("%s: %s", filename, testcase.Expression))
@@ -88,7 +88,7 @@ func runSyntaxTestCase(assert *assert.Assertions, given interface{}, testcase Te
 	assert.NotNil(err, fmt.Sprintf("Expression: %s", testcase.Expression))
 }
 
-func runTestCase(assert *assert.Assertions, given interface{}, testcase TestCase, filename string) {
+func runTestCase(assert *assert.Assertions, given any, testcase TestCase, filename string) {
 	lexer := parsing.NewLexer()
 	var err error
 	_, err = lexer.Tokenize(testcase.Expression)

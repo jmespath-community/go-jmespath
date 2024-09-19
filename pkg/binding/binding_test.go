@@ -8,7 +8,7 @@ import (
 func TestNewBinding(t *testing.T) {
 	tests := []struct {
 		name  string
-		value interface{}
+		value any
 		want  Binding
 	}{{
 		name:  "nil",
@@ -24,8 +24,8 @@ func TestNewBinding(t *testing.T) {
 		want:  &binding{"42"},
 	}, {
 		name:  "array",
-		value: []interface{}{"42", 42},
-		want:  &binding{[]interface{}{"42", 42}},
+		value: []any{"42", 42},
+		want:  &binding{[]any{"42", 42}},
 	}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -39,8 +39,8 @@ func TestNewBinding(t *testing.T) {
 func Test_binding_Value(t *testing.T) {
 	tests := []struct {
 		name    string
-		value   interface{}
-		want    interface{}
+		value   any
+		want    any
 		wantErr bool
 	}{{
 		name:    "nil",
@@ -59,8 +59,8 @@ func Test_binding_Value(t *testing.T) {
 		wantErr: false,
 	}, {
 		name:    "array",
-		value:   []interface{}{"42", 42},
-		want:    []interface{}{"42", 42},
+		value:   []any{"42", 42},
+		want:    []any{"42", 42},
 		wantErr: false,
 	}}
 	for _, tt := range tests {

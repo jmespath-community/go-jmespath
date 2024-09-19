@@ -21,15 +21,15 @@ This is a tree based interpreter.  It walks the AST and directly
 	interprets the AST to search through a JSON document.
 */
 type Interpreter interface {
-	Execute(parsing.ASTNode, interface{}, ...Option) (interface{}, error)
+	Execute(parsing.ASTNode, any, ...Option) (any, error)
 }
 
 type treeInterpreter struct {
-	root     interface{}
+	root     any
 	bindings binding.Bindings
 }
 
-func NewInterpreter(data interface{}, bindings binding.Bindings) Interpreter {
+func NewInterpreter(data any, bindings binding.Bindings) Interpreter {
 	if bindings == nil {
 		bindings = binding.NewBindings()
 	}
@@ -42,7 +42,7 @@ func NewInterpreter(data interface{}, bindings binding.Bindings) Interpreter {
 // Execute takes an ASTNode and input data and interprets the AST directly.
 // It will produce the result of applying the JMESPath expression associated
 // with the ASTNode to the input data "value".
-func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}, opts ...Option) (interface{}, error) {
+func (intr *treeInterpreter) Execute(node parsing.ASTNode, value any, opts ...Option) (any, error) {
 	var o Options
 	for _, opt := range opts {
 		if opt != nil {
@@ -56,7 +56,7 @@ func (intr *treeInterpreter) Execute(node parsing.ASTNode, value interface{}, op
 	return intr.execute(node, value, functionCaller)
 }
 
-func (intr *treeInterpreter) execute(node parsing.ASTNode, value interface{}, functionCaller FunctionCaller) (interface{}, error) {
+func (intr *treeInterpreter) execute(node parsing.ASTNode, value any, functionCaller FunctionCaller) (any, error) {
 	switch node.NodeType {
 	case parsing.ASTArithmeticUnaryExpression:
 		expr, err := intr.execute(node.Children[0], value, functionCaller)
@@ -140,11 +140,11 @@ func (intr *treeInterpreter) execute(node parsing.ASTNode, value interface{}, fu
 			return leftNum <= rightNum, nil
 		}
 	case parsing.ASTExpRef:
-		return func(data interface{}) (interface{}, error) {
+		return func(data any) (any, error) {
 			return intr.execute(node.Children[0], data, functionCaller)
 		}, nil
 	case parsing.ASTFunctionExpression:
-		resolvedArgs := []interface{}{}
+		resolvedArgs := []any{}
 		for _, arg := range node.Children {
 			current, err := intr.execute(arg, value, functionCaller)
 			if err != nil {
@@ -160,7 +160,7 @@ func (intr *treeInterpreter) execute(node parsing.ASTNode, value interface{}, fu
 		if err != nil {
 			return nil, nil
 		}
-		sliceType, ok := left.([]interface{})
+		sliceType, ok := left.([]any)
 		if !ok {
 			if util.IsSliceType(left) {
 				return intr.filterProjectionWithReflection(node, left, functionCaller)
@@ -168,7 +168,7 @@ func (intr *treeInterpreter) execute(node parsing.ASTNode, value interface{}, fu
 			return nil, nil
 		}
 		compareNode := node.Children[2]
-		collected := []interface{}{}
+		collected := []any{}
 		for _, element := range sliceType {
 			result, err := intr.execute(compareNode, element, functionCaller)
 			if err != nil {
@@ -190,9 +190,9 @@ func (intr *treeInterpreter) execute(node parsing.ASTNode, value interface{}, fu
 		if err != nil {
 			return nil, nil
 		}
-		sliceType, ok := left.([]interface{})
+		sliceType, ok := left.([]any)
 		if !ok {
-			// If we can't type convert to []interface{}, there's
+			// If we can't type convert to []any, there's
 			// a chance this could still work via reflection if we're
 			// dealing with user provided types.
 			if util.IsSliceType(left) {
@@ -200,12 +200,12 @@ func (intr *treeInterpreter) execute(node parsing.ASTNode, value interface{}, fu
 			}
 			return nil, nil
 		}
-		flattened := []interface{}{}
+		flattened := []any{}
 		for _, element := range sliceType {
-			if elementSlice, ok := element.([]interface{}); ok {
+			if elementSlice, ok := element.([]any); ok {
 				flattened = append(flattened, elementSlice...)
 			} else if util.IsSliceType(element) {
-				reflectFlat := []interface{}{}
+				reflectFlat := []any{}
 				v := reflect.ValueOf(element)
 				for i := 0; i < v.Len(); i++ {
 					reflectFlat = append(reflectFlat, v.Index(i).Interface())
@@ -254,7 +254,7 @@ func (intr *treeInterpreter) execute(node parsing.ASTNode, value interface{}, fu
 			return value, nil
 		}
 	case parsing.ASTIndex:
-		if sliceType, ok := value.([]interface{}); ok {
+		if sliceType, ok := value.([]any); ok {
 			index := node.Value.(int)
 			if index < 0 {
 				index += len(sliceType)
@@ -282,7 +282,7 @@ func (intr *treeInterpreter) execute(node parsing.ASTNode, value interface{}, fu
 	case parsing.ASTLiteral:
 		return node.Value, nil
 	case parsing.ASTMultiSelectHash:
-		collected := make(map[string]interface{})
+		collected := make(map[string]any)
 		for _, child := range node.Children {
 			current, err := intr.execute(child, value, functionCaller)
 			if err != nil {
@@ -293,7 +293,7 @@ func (intr *treeInterpreter) execute(node parsing.ASTNode, value interface{}, fu
 		}
 		return collected, nil
 	case parsing.ASTMultiSelectList:
-		collected := []interface{}{}
+		collected := []any{}
 		for _, child := range node.Children {
 			current, err := intr.execute(child, value, functionCaller)
 			if err != nil {
@@ -367,7 +367,7 @@ func (intr *treeInterpreter) execute(node parsing.ASTNode, value interface{}, fu
 			return nil, err
 		}
 
-		sliceType, ok := left.([]interface{})
+		sliceType, ok := left.([]any)
 		if !ok {
 			if util.IsSliceType(left) {
 				return intr.projectWithReflection(node, left, functionCaller)
@@ -378,8 +378,8 @@ func (intr *treeInterpreter) execute(node parsing.ASTNode, value interface{}, fu
 			}
 			return nil, nil
 		}
-		collected := []interface{}{}
-		var current interface{}
+		collected := []any{}
+		var current any
 		for _, element := range sliceType {
 			current, err = intr.execute(node.Children[1], element, functionCaller)
 			if err != nil {
@@ -401,7 +401,7 @@ func (intr *treeInterpreter) execute(node parsing.ASTNode, value interface{}, fu
 		return intr.execute(node.Children[1], left, functionCaller)
 	case parsing.ASTSlice:
 		parts := node.Value.([]*int)
-		sliceType, ok := value.([]interface{})
+		sliceType, ok := value.([]any)
 		if !ok {
 			if util.IsSliceType(value) {
 				return intr.sliceWithReflection(node, value)
@@ -427,15 +427,15 @@ func (intr *treeInterpreter) execute(node parsing.ASTNode, value interface{}, fu
 		if err != nil {
 			return nil, nil
 		}
-		mapType, ok := left.(map[string]interface{})
+		mapType, ok := left.(map[string]any)
 		if !ok {
 			return nil, nil
 		}
-		values := []interface{}{}
+		values := []any{}
 		for _, value := range mapType {
 			values = append(values, value)
 		}
-		collected := []interface{}{}
+		collected := []any{}
 		for _, element := range values {
 			current, err := intr.execute(node.Children[1], element, functionCaller)
 			if err != nil {
@@ -454,7 +454,7 @@ func extractField(value any, field string) (any, error) {
 	if value == nil {
 		return nil, nil
 	}
-	if m, ok := value.(map[string]interface{}); ok {
+	if m, ok := value.(map[string]any); ok {
 		return m[field], nil
 	}
 	return extractFieldUsingReflection(reflect.ValueOf(value), field)
@@ -486,9 +486,9 @@ func extractFieldUsingReflection(value reflect.Value, field string) (any, error)
 	return nil, nil
 }
 
-func (intr *treeInterpreter) flattenWithReflection(value interface{}) (interface{}, error) {
+func (intr *treeInterpreter) flattenWithReflection(value any) (any, error) {
 	v := reflect.ValueOf(value)
-	flattened := []interface{}{}
+	flattened := []any{}
 	for i := 0; i < v.Len(); i++ {
 		element := v.Index(i).Interface()
 		if reflect.TypeOf(element).Kind() == reflect.Slice {
@@ -507,7 +507,7 @@ func (intr *treeInterpreter) flattenWithReflection(value interface{}) (interface
 	return flattened, nil
 }
 
-func (intr *treeInterpreter) sliceWithReflection(node parsing.ASTNode, value interface{}) (interface{}, error) {
+func (intr *treeInterpreter) sliceWithReflection(node parsing.ASTNode, value any) (any, error) {
 	v := reflect.ValueOf(value)
 	parts := node.Value.([]*int)
 	sliceParams := make([]util.SliceParam, 3)
@@ -517,7 +517,7 @@ func (intr *treeInterpreter) sliceWithReflection(node parsing.ASTNode, value int
 			sliceParams[i].N = *part
 		}
 	}
-	final := []interface{}{}
+	final := []any{}
 	for i := 0; i < v.Len(); i++ {
 		element := v.Index(i).Interface()
 		final = append(final, element)
@@ -525,9 +525,9 @@ func (intr *treeInterpreter) sliceWithReflection(node parsing.ASTNode, value int
 	return util.Slice(final, sliceParams)
 }
 
-func (intr *treeInterpreter) filterProjectionWithReflection(node parsing.ASTNode, value interface{}, functionCaller FunctionCaller) (interface{}, error) {
+func (intr *treeInterpreter) filterProjectionWithReflection(node parsing.ASTNode, value any, functionCaller FunctionCaller) (any, error) {
 	compareNode := node.Children[2]
-	collected := []interface{}{}
+	collected := []any{}
 	v := reflect.ValueOf(value)
 	for i := 0; i < v.Len(); i++ {
 		element := v.Index(i).Interface()
@@ -548,8 +548,8 @@ func (intr *treeInterpreter) filterProjectionWithReflection(node parsing.ASTNode
 	return collected, nil
 }
 
-func (intr *treeInterpreter) projectWithReflection(node parsing.ASTNode, value interface{}, functionCaller FunctionCaller) (interface{}, error) {
-	collected := []interface{}{}
+func (intr *treeInterpreter) projectWithReflection(node parsing.ASTNode, value any, functionCaller FunctionCaller) (any, error) {
+	collected := []any{}
 	v := reflect.ValueOf(value)
 	for i := 0; i < v.Len(); i++ {
 		element := v.Index(i).Interface()
