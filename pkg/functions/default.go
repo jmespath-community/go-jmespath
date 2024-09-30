@@ -46,7 +46,8 @@ func GetDefaultFunctions() []FunctionEntry {
 			{Types: []JpType{JpNumber}, Optional: true},
 			{Types: []JpType{JpNumber}, Optional: true},
 		},
-		Handler: jpfFindFirst,
+		Handler:     jpfFindFirst,
+		Description: "Returns the zero-based index of the first occurence where the substring appears in a string or null if it does not appear.",
 	}, {
 		Name: "find_last",
 		Arguments: []ArgSpec{
@@ -55,7 +56,8 @@ func GetDefaultFunctions() []FunctionEntry {
 			{Types: []JpType{JpNumber}, Optional: true},
 			{Types: []JpType{JpNumber}, Optional: true},
 		},
-		Handler: jpfFindLast,
+		Handler:     jpfFindLast,
+		Description: "Returns the zero-based index of the last occurence where the substring appears in a string or null if it does not appear.",
 	}, {
 		Name: "floor",
 		Arguments: []ArgSpec{
@@ -68,14 +70,16 @@ func GetDefaultFunctions() []FunctionEntry {
 		Arguments: []ArgSpec{
 			{Types: []JpType{JpArrayArray}},
 		},
-		Handler: jpfFromItems,
+		Handler:     jpfFromItems,
+		Description: "Returns an object from the provided array of key value pairs. This function is the inversed of the `items()` function.",
 	}, {
 		Name: "group_by",
 		Arguments: []ArgSpec{
 			{Types: []JpType{JpArray}},
 			{Types: []JpType{JpExpref}},
 		},
-		Handler: jpfGroupBy,
+		Handler:     jpfGroupBy,
+		Description: "Groups an array of objects using an expression as the group key.",
 	}, {
 		Name: "items",
 		Arguments: []ArgSpec{
@@ -171,7 +175,8 @@ func GetDefaultFunctions() []FunctionEntry {
 			{Types: []JpType{JpNumber}},
 			{Types: []JpType{JpString}, Optional: true},
 		},
-		Handler: jpfPadLeft,
+		Handler:     jpfPadLeft,
+		Description: "Adds characters to the beginning of a string.",
 	}, {
 		Name: "pad_right",
 		Arguments: []ArgSpec{
@@ -179,7 +184,8 @@ func GetDefaultFunctions() []FunctionEntry {
 			{Types: []JpType{JpNumber}},
 			{Types: []JpType{JpString}, Optional: true},
 		},
-		Handler: jpfPadRight,
+		Handler:     jpfPadRight,
+		Description: "Adds characters to the end of a string.",
 	}, {
 		Name: "replace",
 		Arguments: []ArgSpec{
@@ -241,7 +247,8 @@ func GetDefaultFunctions() []FunctionEntry {
 		Arguments: []ArgSpec{
 			{Types: []JpType{JpAny}},
 		},
-		Handler: jpfToArray,
+		Handler:     jpfToArray,
+		Description: "Returns a one element array containing the passed in argument, or the passed in value if it's an array.",
 	}, {
 		Name: "to_number",
 		Arguments: []ArgSpec{
@@ -262,21 +269,24 @@ func GetDefaultFunctions() []FunctionEntry {
 			{Types: []JpType{JpString}},
 			{Types: []JpType{JpString}, Optional: true},
 		},
-		Handler: jpfTrim,
+		Handler:     jpfTrim,
+		Description: "Removes the leading and trailing characters found in the passed in string argument.",
 	}, {
 		Name: "trim_left",
 		Arguments: []ArgSpec{
 			{Types: []JpType{JpString}},
 			{Types: []JpType{JpString}, Optional: true},
 		},
-		Handler: jpfTrimLeft,
+		Handler:     jpfTrimLeft,
+		Description: "Removes the leading characters found in the passed in string argument.",
 	}, {
 		Name: "trim_right",
 		Arguments: []ArgSpec{
 			{Types: []JpType{JpString}},
 			{Types: []JpType{JpString}, Optional: true},
 		},
-		Handler: jpfTrimRight,
+		Handler:     jpfTrimRight,
+		Description: "Removes the trailing characters found in the passed in string argument.",
 	}, {
 		Name: "type",
 		Arguments: []ArgSpec{
@@ -304,6 +314,7 @@ func GetDefaultFunctions() []FunctionEntry {
 			{Types: []JpType{JpArray}},
 			{Types: []JpType{JpArray}, Variadic: true},
 		},
-		Handler: jpfZip,
+		Handler:     jpfZip,
+		Description: "Accepts one or more arrays as arguments and returns an array of arrays in which the i-th array contains the i-th element from each of the argument arrays. The returned array is truncated to the length of the shortest argument array.",
 	}}
 }
