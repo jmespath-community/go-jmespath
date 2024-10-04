@@ -185,6 +185,31 @@ func TestCanSupportProjectionsWithStructs(t *testing.T) {
 	assert.Equal([]any{"first", "second", "third"}, result)
 }
 
+func TestCompareStrings(t *testing.T) {
+	assert := assert.New(t)
+	data := []string{"a", "b", "c"}
+	{
+		result, err := search(t, "@[?@ > 'a']", data)
+		assert.Nil(err)
+		assert.Equal([]interface{}{"b", "c"}, result)
+	}
+	{
+		result, err := search(t, "@[?@ >= 'b']", data)
+		assert.Nil(err)
+		assert.Equal([]interface{}{"b", "c"}, result)
+	}
+	{
+		result, err := search(t, "@[?@ < 'b']", data)
+		assert.Nil(err)
+		assert.Equal([]interface{}{"a"}, result)
+	}
+	{
+		result, err := search(t, "@[?@ <= 'b']", data)
+		assert.Nil(err)
+		assert.Equal([]interface{}{"a", "b"}, result)
+	}
+}
+
 func TestCanSupportSliceOfStructsWithFunctions(t *testing.T) {
 	assert := assert.New(t)
 	data := []scalars{{"a1", "b1"}, {"a2", "b2"}}
