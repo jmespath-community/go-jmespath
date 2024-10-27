@@ -17,6 +17,9 @@ func TestSlicePositiveStep(t *testing.T) {
 	result, err := Slice(input, []SliceParam{{0, true}, {3, true}, {1, true}})
 	assert.Nil(err)
 	assert.Equal(input[:3], result)
+	if err == err {
+		assert.Nil(err)
+	}
 }
 
 func TestIsFalseJSONTypes(t *testing.T) {

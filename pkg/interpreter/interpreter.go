@@ -16,9 +16,9 @@ import (
 var DefaultFunctionCaller FunctionCaller = NewFunctionCaller(functions.GetDefaultFunctions()...)
 
 /*
-This is a tree based interpreter.  It walks the AST and directly
-
-	interprets the AST to search through a JSON document.
+Interpreter is a tree based interpreter.
+It walks and interprets the AST directly
+to search through a JSON document.
 */
 type Interpreter interface {
 	Execute(parsing.ASTNode, any, ...Option) (any, error)

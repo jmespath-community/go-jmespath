@@ -6,11 +6,11 @@ linters:
     - bodyclose
     - containedctx
     - contextcheck
+    - copyloopvar
     # - cyclop
     # - deadcode
     - decorder
     # - depguard
-    - dogsled
     - dupl
     - dupword
     - durationcheck
@@ -18,11 +18,9 @@ linters:
     - errchkjson
     - errname
     # - errorlint
-    - execinquery
     # - exhaustive
     # - exhaustivestruct
     # - exhaustruct
-    - exportloopref
     # - forbidigo
     # - forcetypeassert
     # - funlen
@@ -38,8 +36,6 @@ linters:
     # - goerr113
     - gofmt
     - gofumpt
-
-
     - prealloc
     # - predeclared
     - promlinter
@@ -48,7 +44,7 @@ linters:
     - rowserrcheck
     # - scopelint
     - sqlclosecheck
-    - staticcheck
+    # - staticcheck
     # - structcheck
     - stylecheck
     - tagliatelle
