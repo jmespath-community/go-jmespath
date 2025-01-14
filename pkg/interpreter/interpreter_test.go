@@ -200,6 +200,13 @@ func TestCanSupportEvaluatingRightHandSideOfStringSlice(t *testing.T) {
 	assert.Nil(err)
 	assert.Equal(result.(float64), 3.0)
 }
+func TestErrEvaluatingRightHandSideOfStringSlice(t *testing.T) {
+	assert := assert.New(t)
+	data := make(map[string]interface{})
+	_, err := search(t, "'foo'[:].unknown(@)", data)
+	assert.NotNil(err)
+	assert.Equal("unknown function: unknown", err.Error())
+}
 
 func BenchmarkInterpretSingleFieldStruct(b *testing.B) {
 	assert := assert.New(b)
