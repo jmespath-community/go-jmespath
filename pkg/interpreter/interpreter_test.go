@@ -200,6 +200,7 @@ func TestCanSupportEvaluatingRightHandSideOfStringSlice(t *testing.T) {
 	assert.Nil(err)
 	assert.Equal(result.(float64), 3.0)
 }
+
 func TestErrEvaluatingRightHandSideOfStringSlice(t *testing.T) {
 	assert := assert.New(t)
 	data := make(map[string]interface{})
