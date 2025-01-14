@@ -32,18 +32,35 @@ jobs:
         run: go mod download
       - name: Tests
         run: make test
-      - name: Install golint
-        if: ${{ matrix.go-version == '1.17' }}
-        run: |
-          make install-dev-cmds
-          make check
+
+  static-check:
+    name: Run Static Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.18'
+      - name: Install deps 
+        run: go mod download
+      - name: go vet ./...
+        run: go vet ./...
+      # TODO: improve with caching
+      - uses: dominikh/staticcheck-action@v1.2.0
+        with:
+          version: "2022.1.1"
+          install-go: false
+          min-go-version: "1.18"
 
   golangci-lint:
     name: Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
         with:
-          submodules: true
+          go-version: '1.22'
       - name: golangci-lint
         uses: golangci/golangci-lint-action@aaa42aa0628b4ae2578232a66b541047968fac86 # v6.1.0
