@@ -64,3 +64,14 @@ linters:
     - whitespace
     # - wrapcheck
     # - wsl
+
+linters-settings:
+  depguard:
+    rules:
+      main:
+        files:
+          - $all
+          - "!$test"
+        allow:
+          - $gostd
+          - github.com/jmespath-community/go-jmespath
