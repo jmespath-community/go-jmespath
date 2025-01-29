@@ -121,24 +121,36 @@ func (intr *treeInterpreter) execute(node parsing.ASTNode, value any, functionCa
 		case parsing.TOKNE:
 			return !util.ObjsEqual(left, right), nil
 		}
-		leftNum, ok := util.ToNumber(left)
-		if !ok {
-			return nil, nil
+		if leftStr, ok := left.(string); ok {
+			if rightStr, ok := right.(string); ok {
+				switch node.Value {
+				case parsing.TOKGT:
+					return leftStr > rightStr, nil
+				case parsing.TOKGTE:
+					return leftStr >= rightStr, nil
+				case parsing.TOKLT:
+					return leftStr < rightStr, nil
+				case parsing.TOKLTE:
+					return leftStr <= rightStr, nil
+				}
+			}
 		}
-		rightNum, ok := util.ToNumber(right)
-		if !ok {
-			return nil, nil
+		if leftNum, ok := util.ToNumber(left); ok {
+			if rightNum, ok := util.ToNumber(right); ok {
+				switch node.Value {
+				case parsing.TOKGT:
+					return leftNum > rightNum, nil
+				case parsing.TOKGTE:
+					return leftNum >= rightNum, nil
+				case parsing.TOKLT:
+					return leftNum < rightNum, nil
+				case parsing.TOKLTE:
+					return leftNum <= rightNum, nil
+				}
+			}
 		}
-		switch node.Value {
-		case parsing.TOKGT:
-			return leftNum > rightNum, nil
-		case parsing.TOKGTE:
-			return leftNum >= rightNum, nil
-		case parsing.TOKLT:
-			return leftNum < rightNum, nil
-		case parsing.TOKLTE:
-			return leftNum <= rightNum, nil
-		}
+		// TODO: don't we want to return an error here ?
+		return nil, nil
 	case parsing.ASTExpRef:
 		return func(data any) (any, error) {
 			return intr.execute(node.Children[0], data, functionCaller)
