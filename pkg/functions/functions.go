@@ -34,6 +34,8 @@ const (
 	JpAny         JpType = "any"
 )
 
+var stringType = reflect.TypeFor[string]()
+
 type FunctionEntry struct {
 	Name        string
 	Arguments   []ArgSpec
@@ -695,6 +697,9 @@ func jpfToArray(arguments []any) (any, error) {
 func jpfToString(arguments []any) (any, error) {
 	if v, ok := arguments[0].(string); ok {
 		return v, nil
+	}
+	if argType := reflect.TypeOf(arguments[0]); argType.Kind() == stringType.Kind() {
+		return reflect.ValueOf(arguments[0]).Convert(stringType).Interface(), nil
 	}
 	result, err := json.Marshal(arguments[0])
 	if err != nil {

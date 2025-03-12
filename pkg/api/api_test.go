@@ -165,6 +165,22 @@ func TestSearch(t *testing.T) {
 		want: 1.0,
 	}, {
 		args: args{
+			expression: "length(@[?to_string(metric.__name__) == 'foo'])",
+			data: []struct {
+				Metric map[Label]Label
+			}{{
+				Metric: map[Label]Label{
+					"__name__": "foo",
+				},
+			}, {
+				Metric: map[Label]Label{
+					"__name__": "bar",
+				},
+			}},
+		},
+		want: 1.0,
+	}, {
+		args: args{
 			expression: "length(@[?metric.__name__ == 'foo'])",
 			data: []struct {
 				Metric map[string]string
